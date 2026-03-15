@@ -1453,12 +1453,12 @@ local tpCHECK = false
 LP.OnTeleport:Connect(function(State)
 	if getgenv().keepUX and not tpCHECK and queueteleport then
 		tpCHECK = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-g2/refs/heads/main/source'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-g2/main/source'))()")
 	end
 end)
 
 task.spawn(function()
-    local success, result = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-g2/refs/heads/main/version")) end)
+    local success, result = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-g2/main/version")) end)
     if success and typeof(result) == "table" then
         if result.version ~= currentVersion then
             unexpected:notify("unexpected", "You are using an old version (current: " .. currentVersion .. ", latest: " .. result.version .. ")")
