@@ -87,15 +87,6 @@ local function CREATE_ASPECT(PARENT, RATIO)
     })
 end
 
-local function CREATE_ASPECT(PARENT, RATIO)
-    local AR = Instance.new("UIAspectRatioConstraint")
-    if RATIO then
-        AR.AspectRatio = RATIO
-    end
-    AR.Parent = PARENT
-    return AR
-end
-
 local unexpected_UI = {};
 local currentVersion = "g2"
 local function randomString(length, charset)
