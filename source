@@ -64,19 +64,27 @@ local FQ = {
     }
 }
 
-local function CREATE_CORNER(PARENT, RADIUS_SCALE, RADIUS_OFFSET)
-    local CORNER = Instance.new("UICorner")
-    CORNER.CornerRadius = UDim.new(RADIUS_SCALE or 0, RADIUS_OFFSET or 0)
-    CORNER.Parent = PARENT
-    return CORNER
+local function mk(class, parent, props)
+	local o = Instance.new(class, parent)
+	if props then
+		for k, v in pairs(props) do
+			o[k] = v
+		end
+	end
+	return o
 end
 
 local function CREATE_STROKE(PARENT, COLOR, APPLY_MODE)
-    local STROKE = Instance.new("UIStroke")
-    STROKE.Color = COLOR or FQ.COLORS.STROKE
-    STROKE.ApplyStrokeMode = APPLY_MODE or Enum.ApplyStrokeMode.Border
-    STROKE.Parent = PARENT
-    return STROKE
+    return mk("UIStroke", PARENT, {
+        Color = COLOR or FQ.COLORS.STROKE,
+        ApplyStrokeMode = APPLY_MODE or Enum.ApplyStrokeMode.Border
+    })
+end
+
+local function CREATE_ASPECT(PARENT, RATIO)
+    return mk("UIAspectRatioConstraint", PARENT, {
+        AspectRatio = RATIO
+    })
 end
 
 local function CREATE_ASPECT(PARENT, RATIO)
@@ -100,16 +108,6 @@ local function randomString(length, charset)
 		chars[i] = charset:sub(rand, rand)
 	end
 	return table.concat(chars)
-end
-
-local function mk(class, parent, props)
-	local o = Instance.new(class, parent)
-	if props then
-		for k, v in pairs(props) do
-			o[k] = v
-		end
-	end
-	return o
 end
 
 unexpected_UI.UI = mk("ScreenGui", gethui() or COREGUI, { Name = randomString() })
