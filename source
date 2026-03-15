@@ -249,7 +249,6 @@ unexpected_UI.DISCORD.MouseButton1Click:Connect(function()
 		})
 	end
 end)
-
 CREATE_CORNER(unexpected_UI.DISCORD, 0.3, 0)
 CREATE_STROKE(unexpected_UI.DISCORD, FQ.COLORS.STROKE)
 
@@ -328,10 +327,8 @@ end
 function unexpected:addcmd(name, desc, func, aliases, usageArgs)
 	aliases = aliases or {}
 	usageArgs = usageArgs or {}
-
 	local displayName = name
 	local actualName = string.gsub(name, "^%[.-%]%s*", "")
-
 	local entry = {
 		Original = actualName,
 		Description = desc,
@@ -390,7 +387,6 @@ local function showcmdList()
 	local used = {}
 	local BTNLIST = unexpected_UI.BTNLIST
 	local CMDEXAMPLE = unexpected_UI.CMDEXAMPLE
-
 	if not _sharedTooltip then
 		_sharedTooltip = mk("TextLabel", unexpected_UI.UI, {
 			BackgroundColor3 = FQ.COLORS.BACKGROUND,
@@ -458,9 +454,7 @@ local function showcmdList()
 			btn.Visible = true
 			btn.Position = UDim2.new(0, 0, 0, index * 32)
 			btn.Parent = BTNLIST
-
 			_btnMeta[btn] = { data = entry, usage = ( (#entry.UsageArgs > 0) and ("usage: " .. entry.Original .. " [" .. table.concat(entry.UsageArgs, "] [") .. "]") ) or ("usage: " .. entry.Original) }
-
 			table.insert(commandButtonCache, btn)
 			index = index + 1
 		end
@@ -516,14 +510,11 @@ local loadingBar = mk("Frame", notifUI, {
 })
 
 local notifPos = notifUI.Position
-
 local function notifQueue()
 	notifSeq = notifSeq + 1
 	local mySeq = notifSeq
-
 	if #notificationQueue == 0 then
 		isNotif = false
-
 		local fadeOutTween = playTween(notifUI, {
 			BackgroundTransparency = 1,
 			Position = notifPos + UDim2.new(0, 0, 0, 10),
@@ -536,7 +527,6 @@ local function notifQueue()
 		end
 
 		fadeOutTween:Play()
-
 		task.delay(0.3, function()
 			notifUI.Visible = false
 			notifUI.Position = notifPos
@@ -552,13 +542,11 @@ local function notifQueue()
 
 	isNotif = true
 	local data = table.remove(notificationQueue, 1)
-
 	local total = #notificationQueue + 1
 	notiftitle.Text = string.format("%s (%d)", tostring(data.title), total)
 	notiftext.Text = tostring(data.text)
 	loadingBar.Size = UDim2.new(0.82, 0, 0, 1)
 	notifUI.Visible = true
-
 	if total == 1 then
 		notifUI.BackgroundTransparency = 1
 		for _, v in ipairs(notifUI:GetDescendants()) do
@@ -592,7 +580,6 @@ end
 function unexpected:notify(title, ...)
 	local args = {...}
 	local text = table.concat(args, " ")
-
 	table.insert(notificationQueue, {
 		title = tostring(title or "Notification"),
 		text = text
@@ -610,8 +597,7 @@ end
 unexpected_UI["CLI"]:GetPropertyChangedSignal("Text"):Connect(function()
 	local input = unexpected_UI["CLI"].Text
 	local cmdName = string.match(input, "^%S+") or ""
-	local suggestion = ""
-
+	local suggestion = "
 	if cmdName ~= "" then
 		local lowerCmd = string.lower(cmdName)
 		local node = trieRoot
@@ -708,7 +694,6 @@ local function updateList(filter)
 	end
 
 	table.sort(filtered, function(a, b) return a.Text < b.Text end)
-
 	for i, btn in ipairs(filtered) do
 		btn.Position = UDim2.new(0, 0, 0, (i - 1) * 32)
 		btn.Visible = true
@@ -740,7 +725,6 @@ local defaultConfig = {
 }
 
 CONFIG = CONFIG or {}
-
 local function lc()
     local config = {}
     if isfile(configFile) then
@@ -1084,7 +1068,6 @@ unexpected:addcmd("plugin", "Add a plugin", function(NAME)
         UX_config()
     end
 end, nil, {"name"})
-
 
 unexpected:addcmd("unplugin", "Remove a plugin", function(NAME)
     if not NAME or NAME == "" then
