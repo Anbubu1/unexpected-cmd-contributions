@@ -28,15 +28,12 @@ MOBILE = UIS.TouchEnabled
 --#importsEnd
 
 --#importFuncs
-CHAR = LP.Character or LP.CharacterAdded:Wait()
-HUM = cloneref(CHAR:WaitForChild("Humanoid"))
-HRP = cloneref(CHAR:WaitForChild("HumanoidRootPart"))
+local function SETUPCHAR(c)
+	CHAR, HUM, HRP = c, cloneref(c:WaitForChild("Humanoid")), cloneref(c:WaitForChild("HumanoidRootPart"))
+end
 
-LP.CharacterAdded:Connect(function(c)
-	CHAR = c
-	HUM = cloneref(c:WaitForChild("Humanoid"))
-	HRP = cloneref(c:WaitForChild("HumanoidRootPart"))
-end)
+SETUPCHAR(LP.Character or LP.CharacterAdded:Wait())
+LP.CharacterAdded:Connect(SETUPCHAR)
 --#importFuncsEnd
 
 local FQ = {
@@ -108,7 +105,6 @@ local function randomString(length, charset)
 end
 
 unexpected_UI.UI = mk("ScreenGui", gethui() or COREGUI, { Name = randomString() })
-
 unexpected_UI.PILL = mk("Frame", unexpected_UI.UI, {
 	ZIndex = 0,
 	BorderSizePixel = 0,
@@ -1090,14 +1086,11 @@ unexpected:addcmd("discord", "Discord Server", function()
 		httprequest({
 			Url = "http://127.0.0.1:6463/rpc?v=1",
 			Method = "POST",
-			Headers = {
-				["Content-Type"] = "application/json",
-				Origin = "https://discord.com"
-			},
+			Headers = {["Content-Type"] = "application/json", Origin = "https://discord.com"},
 			Body = HS:JSONEncode({
 				cmd = "INVITE_BROWSER",
 				nonce = HS:GenerateGUID(false),
-				args = { code = "J73SnGB2y2" }
+				args = {code = "J73SnGB2y2"}
 			})
 		})
 	end
@@ -1330,7 +1323,6 @@ unexpected:addcmd("fly", "Enable flying", function(spd)
 	bv.MaxForce, bg.MaxTorque, bg.P = Vector3.one * 1e6, Vector3.one * 1e6, 1e4
 
 	local input = {w = 0, s = 0, a = 0, d = 0, up = 0, down = 0}
-
 	if MOBILE then
 		HUM.StateChanged:Connect(function(_, state)
 			if state == Enum.HumanoidStateType.Jumping then
@@ -1410,7 +1402,6 @@ unexpected:addcmd("bang", "Bang someone", function(name, speedArg)
 	banging = true
 
 	conn = RS.Heartbeat:Connect(function(dt)
-	
 		if not banging then conn:Disconnect() conn = nil return end
 		local lv = thrp.CFrame.LookVector.Unit
 		local back = thrp.Position - lv * 2
@@ -1450,7 +1441,7 @@ if MOBILE then
 end
 
 local tpCHECK = false
-LP.OnTeleport:Connect(function(State)
+LP.OnTeleport:Connect(function()
 	if getgenv().keepUX and not tpCHECK and queueteleport then
 		tpCHECK = true
 		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-g2/main/source'))()")
