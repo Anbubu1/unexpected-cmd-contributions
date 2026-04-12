@@ -131,7 +131,7 @@ unexpected_UI.CLI = mk("TextBox", unexpected_UI.PILL, {
 	TextXAlignment = Enum.TextXAlignment.Left,
 	PlaceholderColor3 = FQ.COLORS.TEXT_DIM,
 	BorderSizePixel = 0,
-	TextWrapped = true,
+	TextWrapped = false,
 	TextSize = 20,
 	TextColor3 = FQ.COLORS.TEXT_MAIN,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
@@ -142,15 +142,19 @@ unexpected_UI.CLI = mk("TextBox", unexpected_UI.PILL, {
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Text = "",
 	ClearTextOnFocus = false,
-	ZIndex = 1,
+	ZIndex = 2,
 	BackgroundTransparency = 1,
 })
+
+unexpected_UI.CLI.TextXAlignment = Enum.TextXAlignment.Left
+unexpected_UI.CLI.TextWrapped = false
+unexpected_UI.CLI.ClipsDescendants = true
 
 unexpected_UI.PREDICTOR = mk("TextLabel", unexpected_UI.PILL, {
 	Name = "Predictor",
 	TextXAlignment = Enum.TextXAlignment.Left,
 	BorderSizePixel = 0,
-	TextWrapped = true,
+	TextWrapped = false,
 	TextSize = 20,
 	TextColor3 = FQ.COLORS.STROKE,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
@@ -159,9 +163,43 @@ unexpected_UI.PREDICTOR = mk("TextLabel", unexpected_UI.PILL, {
 	Position = UDim2.new(0, 25, 0.5, -27),
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Text = "",
-	ZIndex = 0,
+	ZIndex = 1,
 	BackgroundTransparency = 1,
+	ClipsDescendants = true
 })
+
+local MAX_VISIBLE = 19
+local CHAR_WIDTH = 9
+local SCROLL_OFFSET = 0
+local cliPad = mk("UIPadding", unexpected_UI.CLI)
+local predPad = mk("UIPadding", unexpected_UI.PREDICTOR)
+
+local function updateTB()
+	local cursor = unexpected_UI.CLI.CursorPosition
+	if cursor < 0 then return end
+	local VIEW_WIDTH = MAX_VISIBLE * CHAR_WIDTH
+	local TARGET_X = (cursor - 1) * CHAR_WIDTH
+
+	if TARGET_X < SCROLL_OFFSET then
+		SCROLL_OFFSET = TARGET_X
+	elseif TARGET_X > SCROLL_OFFSET + VIEW_WIDTH then
+		SCROLL_OFFSET = TARGET_X - VIEW_WIDTH
+	end
+end
+
+local function applyTB()
+	local OFFSET = UDim.new(0, -SCROLL_OFFSET)
+	cliPad.PaddingLeft = OFFSET
+	predPad.PaddingLeft = OFFSET
+end
+
+local function refresh()
+	updateTB()
+	applyTB()
+end
+
+unexpected_UI.CLI:GetPropertyChangedSignal("Text"):Connect(refresh)
+unexpected_UI.CLI:GetPropertyChangedSignal("CursorPosition"):Connect(refresh)
 
 unexpected_UI.MENU = mk("ImageButton", unexpected_UI.PILL, {
 	BorderSizePixel = 0,
