@@ -1,6 +1,7 @@
 ![](https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/unexpected_assets/unexpected-cmd.png)
 # unexpected cmd
-An open source Roblox admin commands script [Discord](https://discord.gg/J73SnGB2y2) [Website](https://audio-wav.github.io/unexpected-cmd)
+An open source Roblox admin commands script [Website](https://audio-wav.github.io/unexpected-cmd)
+[![](https://dcbadge.limes.pink/api/server/J73SnGB2y2?style=flat)](https://discord.gg/J73SnGB2y2)
 ```lua
 loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source'))()
 ```
