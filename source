@@ -41,31 +41,19 @@ local uxassets = {
 	["unexpected_assets/back.png"]  = "rbxassetid://10709812784",
 }
 
-if makefolder and isfolder and writefile and isfile then
-	pcall(function()
-		local assets = "https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/"
-		for _, folder in {"unexpected_assets"} do
-			if not isfolder(folder) then makefolder(folder) end
-		end
-		for path in uxassets do
-			if not isfile(path) then
-				writefile(path, game:HttpGet(assets .. path))
-			end
-		end
-		if MOBILE then writefile("unexpected_assets/.nomedia", "") end
-	end)
-end
+if makefolder and isfolder and writefile and isfile then pcall(function()
+    if not isfolder("unexpected_assets") then makefolder("unexpected_assets") end
+    local base = "https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/"
+    for path in pairs(uxassets) do
+        if not isfile(path) then writefile(path, game:HttpGet(base .. path)) end
+    end
+    if MOBILE then writefile("unexpected_assets/.nomedia", "") end
+end) end
 
 local function getcustomasset(asset)
-	if uxgetcustomasset then
-		local success, result = pcall(function()
-			return uxgetcustomasset(asset)
-		end)
-		if success and result ~= nil and result ~= "" then
-			return result
-		end
-	end
-	return uxassets[asset]
+    if not uxgetcustomasset then return uxassets[asset] end
+    local ok, r = pcall(uxgetcustomasset, asset)
+    return (ok and r ~= "" and r) or uxassets[asset]
 end
 --#importFuncsEnd
 
