@@ -9,6 +9,7 @@ end
 --#core
 cloneref = missing("function", cloneref, function(...) return ... end)
 queueteleport = missing("function", queue_on_teleport or (syn and syn.queue_on_teleport) or (fluxus and fluxus.queue_on_teleport))
+uxgetcustomasset = missing("function", getcustomasset or getsynasset)
 --#coreEnd
 
 --#imports
@@ -34,6 +35,38 @@ end
 
 SETUPCHAR(LP.Character or LP.CharacterAdded:Wait())
 LP.CharacterAdded:Connect(SETUPCHAR)
+
+local uxassets = {
+	["unexpected_assets/menu.png"] = "rbxassetid://10734887784",
+	["unexpected_assets/back.png"]  = "rbxassetid://10709812784",
+}
+
+if makefolder and isfolder and writefile and isfile then
+	pcall(function()
+		local assets = "https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/"
+		for _, folder in {"unexpected_assets"} do
+			if not isfolder(folder) then makefolder(folder) end
+		end
+		for path in uxassets do
+			if not isfile(path) then
+				writefile(path, game:HttpGet(assets .. path))
+			end
+		end
+		if MOBILE then writefile("unexpected_assets/.nomedia", "") end
+	end)
+end
+
+local function getcustomasset(asset)
+	if uxgetcustomasset then
+		local success, result = pcall(function()
+			return uxgetcustomasset(asset)
+		end)
+		if success and result ~= nil and result ~= "" then
+			return result
+		end
+	end
+	return uxassets[asset]
+end
 --#importFuncsEnd
 
 local FQ = {
@@ -91,7 +124,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {};
-local currentVersion = "g2"
+local currentVersion = "v1.0"
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
 	charset = charset or "abcdefghijklmnopqRStuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -160,7 +193,7 @@ unexpected_UI.MENU = mk("ImageButton", unexpected_UI.PILL, {
 	BackgroundTransparency = 1,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
 	ImageColor3 = FQ.COLORS.ACCENT,
-	Image = "rbxassetid://10734887784",
+	Image = getcustomasset("unexpected_assets/menu.png"),
 	Size = UDim2.new(0, 30, 0, 30),
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Name = "Menu",
@@ -272,6 +305,22 @@ unexpected_UI.EVENTS_BUTTON = mk("TextButton", unexpected_UI.MENU_SCROLL, {
 CREATE_CORNER(unexpected_UI.EVENTS_BUTTON, 0.3, 0)
 CREATE_STROKE(unexpected_UI.EVENTS_BUTTON, FQ.COLORS.STROKE)
 
+unexpected_UI.PLUGINS_BUTTON = mk("TextButton", unexpected_UI.MENU_SCROLL, {
+	BorderSizePixel = 0,
+	TextSize = 18,
+	TextColor3 = FQ.COLORS.TEXT_MAIN,
+	BackgroundColor3 = FQ.COLORS.BACKGROUND,
+	FontFace = FQ.FONTS.REGULAR,
+	Size = UDim2.new(0, 278, 0, 51),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	Text = "plugins",
+	Name = "pluginsButton",
+	Visible = true,
+	LayoutOrder = 4,
+})
+CREATE_CORNER(unexpected_UI.PLUGINS_BUTTON, 0.3, 0)
+CREATE_STROKE(unexpected_UI.PLUGINS_BUTTON, FQ.COLORS.STROKE)
+
 unexpected_UI.DISCORD = mk("TextButton", unexpected_UI.MENU_SCROLL, {
 	BorderSizePixel = 0,
 	TextSize = 18,
@@ -283,7 +332,7 @@ unexpected_UI.DISCORD = mk("TextButton", unexpected_UI.MENU_SCROLL, {
 	Text = "discord",
 	Name = "discordButton",
 	Visible = true,
-	LayoutOrder = 4,
+	LayoutOrder = 5,
 })
 CREATE_CORNER(unexpected_UI.DISCORD, 0.3, 0)
 CREATE_STROKE(unexpected_UI.DISCORD, FQ.COLORS.STROKE)
@@ -350,7 +399,7 @@ unexpected_UI.CMDBACK = mk("ImageButton", unexpected_UI.CMDFRAME, {
 	BackgroundTransparency = 1,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
 	ImageColor3 = FQ.COLORS.ACCENT,
-	Image = "rbxassetid://10709812784",
+	Image = getcustomasset("unexpected_assets/back.png"),
 	Size = UDim2.new(0,38,0,30),
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Name = "commandBack",
@@ -404,7 +453,7 @@ unexpected_UI.ARBACK = mk("ImageButton", unexpected_UI.ARFRAME, {
 	BackgroundTransparency = 1,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
 	ImageColor3 = FQ.COLORS.ACCENT,
-	Image = "rbxassetid://10709812784",
+	Image = getcustomasset("unexpected_assets/back.png"),
 	Size = UDim2.new(0,38,0,30),
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Name = "autorunBack",
@@ -458,13 +507,67 @@ unexpected_UI.EVBACK = mk("ImageButton", unexpected_UI.EVFRAME, {
 	BackgroundTransparency = 1,
 	BackgroundColor3 = Color3.fromRGB(255,255,255),
 	ImageColor3 = FQ.COLORS.ACCENT,
-	Image = "rbxassetid://10709812784",
+	Image = getcustomasset("unexpected_assets/back.png"),
 	Size = UDim2.new(0,38,0,30),
 	BorderColor3 = FQ.COLORS.BACKGROUND,
 	Name = "eventBack",
 	Position = UDim2.new(0.0885,0,0.82759,0),
 })
 CREATE_ASPECT(unexpected_UI.EVBACK)
+
+unexpected_UI.PLFRAME = mk("Frame", unexpected_UI.MENUFRAME, {
+	BorderSizePixel = 0,
+	BackgroundColor3 = Color3.fromRGB(255,255,255),
+	Size = UDim2.new(0,339,0,348),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	Name = "pluginFrame",
+	BackgroundTransparency = 1,
+	Visible = false,
+})
+
+unexpected_UI.PLBTNLIST = mk("ScrollingFrame", unexpected_UI.PLFRAME, {
+	Active = true,
+	BorderSizePixel = 0,
+	CanvasSize = UDim2.new(0,0,0,0),
+	BackgroundColor3 = Color3.fromRGB(255,255,255),
+	Name = "pluginList",
+	Size = UDim2.new(0,278,0,210),
+	ScrollBarImageColor3 = FQ.COLORS.ACCENT,
+	Position = UDim2.new(0.0885,0,0.32184,0),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	ScrollBarThickness = 1,
+	BackgroundTransparency = 1,
+})
+
+unexpected_UI.PLSEARCHBAR = mk("TextBox", unexpected_UI.PLFRAME, {
+	CursorPosition = -1,
+	Name = "pluginSearch",
+	PlaceholderColor3 = FQ.COLORS.TEXT_DIM,
+	BorderSizePixel = 0,
+	TextSize = 18,
+	TextColor3 = FQ.COLORS.TEXT_MAIN,
+	BackgroundColor3 = Color3.fromRGB(255,255,255),
+	FontFace = FQ.FONTS.REGULAR,
+	PlaceholderText = "search plugins",
+	Size = UDim2.new(0,278,0,41),
+	Position = UDim2.new(0.0885,0,0.17816,0),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	Text = "",
+	BackgroundTransparency = 1,
+})
+
+unexpected_UI.PLBACK = mk("ImageButton", unexpected_UI.PLFRAME, {
+	BorderSizePixel = 0,
+	BackgroundTransparency = 1,
+	BackgroundColor3 = Color3.fromRGB(255,255,255),
+	ImageColor3 = FQ.COLORS.ACCENT,
+	Image = getcustomasset("unexpected_assets/back.png"),
+	Size = UDim2.new(0,38,0,30),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	Name = "pluginBack",
+	Position = UDim2.new(0.0885,0,0.82759,0),
+})
+CREATE_ASPECT(unexpected_UI.PLBACK)
 
 
 local unexpected = {}
@@ -998,12 +1101,14 @@ local MENUFRAMES = {
 	command = MENUFRAME:WaitForChild("commandFrame"),
 	autorun = MENUFRAME:WaitForChild("autorunFrame"),
 	event = MENUFRAME:WaitForChild("eventFrame"),
+	plugin = MENUFRAME:WaitForChild("pluginFrame"),
 }
 local MENUS = {
 	unexpected_UI.MENU_SCROLL:WaitForChild("cmdsButton"),
 	unexpected_UI.MENU_SCROLL:WaitForChild("discordButton"),
 	unexpected_UI.MENU_SCROLL:WaitForChild("autorunsButton"),
 	unexpected_UI.MENU_SCROLL:WaitForChild("eventsButton"),
+	unexpected_UI.MENU_SCROLL:WaitForChild("pluginsButton"),
 }
 
 --#fadesHandler
@@ -1113,10 +1218,10 @@ local function showARList(filter)
 	CONFIG.Autoruns = CONFIG.Autoruns or {}
 	local index = 0
 	for i, full in ipairs(CONFIG.Autoruns) do
-		local display = i .. ": " .. full
+		local display = full
 		if filter == "" or display:lower():find(filter, 1, true) then
 			local btn = arBtnExample:Clone()
-			btn.Text = i .. ": " .. full
+			btn.Text = full
 			btn.Visible = true
 			btn.Position = UDim2.new(0,0,0,index * 32)
 			btn.Parent = unexpected_UI.ARBTNLIST
@@ -1222,6 +1327,81 @@ do
 		local txt = unexpected_UI.EVSEARCHBAR.Text
 		task.delay(0.12, function()
 			if my == evToken then showEVList(txt) end
+		end)
+	end)
+end
+
+local plButtonCache = {}
+local plBtnExample = mk("TextButton", nil, {
+	BorderSizePixel = 0,
+	TextXAlignment = Enum.TextXAlignment.Left,
+	TextSize = 18,
+	TextColor3 = FQ.COLORS.TEXT_MAIN,
+	BackgroundColor3 = FQ.COLORS.BACKGROUND,
+	FontFace = FQ.FONTS.REGULAR,
+	Size = UDim2.new(0,278,0,33),
+	BorderColor3 = FQ.COLORS.BACKGROUND,
+	Text = "",
+	Name = "pluginEntry",
+	Visible = false,
+})
+
+local function clearPLList()
+	for _, btn in ipairs(plButtonCache) do
+		btn.Visible = false
+		btn.Parent = nil
+	end
+	plButtonCache = {}
+	unexpected_UI.PLBTNLIST.CanvasSize = UDim2.new(0,0,0,0)
+end
+
+local function showPLList(filter)
+	clearPLList()
+	filter = string.lower(filter or "")
+	CONFIG.Plugins = CONFIG.Plugins or {}
+	local index = 0
+	for name, enabled in pairs(CONFIG.Plugins) do
+		if enabled and (filter == "" or name:lower():find(filter, 1, true)) then
+			local btn = plBtnExample:Clone()
+			btn.Text = name
+			btn.Visible = true
+			btn.Position = UDim2.new(0,0,0,index * 32)
+			btn.Parent = unexpected_UI.PLBTNLIST
+			local capturedName = name
+			btn.MouseButton1Click:Connect(function()
+				CONFIG.Plugins[capturedName] = nil
+				UX_config()
+				unexpected:notify("plugins", "Removed: " .. capturedName)
+				showPLList(unexpected_UI.PLSEARCHBAR.Text)
+			end)
+			table.insert(plButtonCache, btn)
+			index = index + 1
+		end
+	end
+	unexpected_UI.PLBTNLIST.CanvasSize = UDim2.new(0,0,0,index * 32)
+end
+
+unexpected_UI.PLUGINS_BUTTON.MouseButton1Click:Connect(function()
+	openMenuFrame(MENUFRAMES.plugin, function()
+		unexpected_UI.PLSEARCHBAR.Text = ""
+		showPLList("")
+	end)
+end)
+
+unexpected_UI.PLBACK.MouseButton1Click:Connect(function()
+	fadeOut(MENUFRAMES.plugin)
+	clearPLList()
+	task.delay(0.1, function() for _, b in ipairs(MENUS) do b.Visible = true end end)
+end)
+
+do
+	local plToken = 0
+	unexpected_UI.PLSEARCHBAR:GetPropertyChangedSignal("Text"):Connect(function()
+		plToken = plToken + 1
+		local my = plToken
+		local txt = unexpected_UI.PLSEARCHBAR.Text
+		task.delay(0.12, function()
+			if my == plToken then showPLList(txt) end
 		end)
 	end)
 end
@@ -1461,6 +1641,7 @@ unexpected:addcmd("unautorun", "Remove an autorun command", function(...)
         if v == full then
             table.remove(CONFIG.Autoruns, i)
             UX_config()
+			if MENUFRAMES.autorun.Visible then showARList(unexpected_UI.ARSEARCHBAR.Text) end
             return unexpected:notify("autorun", "Removed: " .. full)
         end
     end
@@ -1498,6 +1679,7 @@ unexpected:addcmd("plugin", "Add a plugin", function(NAME)
     if LOAD_PLUGIN(NAME) then
         CONFIG.Plugins[NAME] = true
         UX_config()
+        if MENUFRAMES.plugin.Visible then showPLList(unexpected_UI.PLSEARCHBAR.Text) end
     end
 end, nil, {"name"})
 
@@ -1509,6 +1691,7 @@ unexpected:addcmd("unplugin", "Remove a plugin", function(NAME)
         CONFIG.Plugins[NAME] = nil
         UX_config()
         unexpected:notify("unexpected", "Plugin '" .. NAME .. "' removed.")
+        if MENUFRAMES.plugin.Visible then showPLList(unexpected_UI.PLSEARCHBAR.Text) end
     else
         unexpected:notify("unexpected", "Plugin '" .. NAME .. "' is not enabled.")
     end
@@ -1667,6 +1850,8 @@ unexpected:addcmd("unevent", "Remove an event trigger", function(event, ...)
 			table.remove(CONFIG.Events, i)
 			UX_config()
 			hookEvents()
+			if not MENUON then return end
+			if MENUFRAMES.event.Visible then showEVList(unexpected_UI.EVSEARCHBAR.Text) end
 			unexpected:notify("events", "Removed event: " .. event)
 			return
 		end
@@ -1678,7 +1863,32 @@ unexpected:addcmd("clearevents", "Remove all event triggers", function()
 	CONFIG.Events = {}
 	UX_config()
 	disconnectEvents()
+	if not MENUON then return
+	else
+		if MENUFRAMES.event.Visible then
+			openMenuFrame(MENUFRAMES.event, function()
+				unexpected_UI.EVSEARCHBAR.Text = ""
+				showEVList("")
+			end)
+		end
+	end
 	unexpected:notify("events", "All events cleared.")
+end)
+
+unexpected:addcmd("clearplugins", "Remove all plugins", function()
+	CONFIG.Plugins = {}
+	UX_config()
+	if not MENUON then return end
+	if MENUFRAMES.plugin.Visible then showPLList(unexpected_UI.PLSEARCHBAR.Text) end
+	unexpected:notify("events", "All plugins cleared.")
+end)
+
+unexpected:addcmd("clearautoruns", "Remove all autoruns", function()
+	CONFIG.Autoruns = {}
+	UX_config()
+	if not MENUON then return end
+	if MENUFRAMES.autorun.Visible then showARList(unexpected_UI.ARSEARCHBAR.Text) end
+	unexpected:notify("events", "All autoruns cleared.")
 end)
 
 unexpected:addcmd("events", "Show events tab", function()
@@ -1702,6 +1912,32 @@ unexpected:addcmd("events", "Show events tab", function()
 			openMenuFrame(MENUFRAMES.event, function()
 				unexpected_UI.EVSEARCHBAR.Text = ""
 				showEVList("")
+			end)
+		end
+	end
+end)
+
+unexpected:addcmd("plugins", "Show plugins tab", function()
+	if not MENUON then
+		MENUON = true
+		MENUFRAME.Size, MENUFRAME.Visible = UDim2.new(0, 339, 0, 0), true
+		playTween(unexpected_UI["PILL"], {Size = UDim2.new(0, 339, 0, 71)}, 0.25, Enum.EasingStyle.Quint):Play()
+		local NS = UDim2.new(0, 230, 0, 54)
+		playTween(CLI, {Size = NS}, 0.25, Enum.EasingStyle.Quint):Play()
+		playTween(unexpected_UI["PREDICTOR"], {Size = NS}, 0.25, Enum.EasingStyle.Quint):Play()
+		playTween(MENUFRAME, {Size = UDim2.new(0, 339, 0, 348)}, 0.25, Enum.EasingStyle.Quint):Play()
+		buttonTP(MENU, 0)
+		task.delay(0.3, function()
+			openMenuFrame(MENUFRAMES.plugin, function()
+				unexpected_UI.PLSEARCHBAR.Text = ""
+				showPLList("")
+			end)
+		end)
+	else
+		if not MENUFRAMES.plugin.Visible then
+			openMenuFrame(MENUFRAMES.plugin, function()
+				unexpected_UI.PLSEARCHBAR.Text = ""
+				showPLList("")
 			end)
 		end
 	end
@@ -2213,12 +2449,12 @@ local tpCHECK = false
 LP.OnTeleport:Connect(function()
 	if getgenv().keepUX and not tpCHECK and queueteleport then
 		tpCHECK = true
-		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-g2/main/source'))()")
+		queueteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source'))()")
 	end
 end)
 
 task.spawn(function()
-    local success, result = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-g2/main/version")) end)
+    local success, result = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/version")) end)
     if success and typeof(result) == "table" then
         if result.version ~= currentVersion then
             unexpected:notify("unexpected", "You are using an old version (current: " .. currentVersion .. ", latest: " .. result.version .. ")")
