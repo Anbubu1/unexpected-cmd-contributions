@@ -618,6 +618,13 @@ function unexpected:addcmd(name, desc, func, aliases, usageArgs)
 	table.insert(commandListArray, entry)
 end
 
+function execmd(cmdName, ...)
+	local cmd = commandListData[string.lower(cmdName)]
+	if cmd then
+		cmd.Execute(...)
+	end
+end
+
 local function clearcmdList()
 	for _, btn in ipairs(commandButtonCache) do
 		_btnMeta[btn] = nil
@@ -2416,6 +2423,10 @@ end)
 unexpected:addcmd("execute", "Execute code", function(...)
     loadstring(...)()
 end, nil, {...})
+
+unexpected:addcmd("execmd", "Execute command", function(cmdName, ...)
+    execmd(cmdName, ...)
+end, nil, {"command", ...})
 
 --#locales
 hookEvents()
