@@ -2451,14 +2451,13 @@ LP.OnTeleport:Connect(function()
 end)
 
 task.spawn(function()
-    local success, result = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/version")) end)
-    if success and typeof(result) == "table" then
-        if result.version ~= currentVersion then
-            unexpected:notify("unexpected", "You are using an old version (current: " .. currentVersion .. ", latest: " .. result.version .. ")")
-        end
-        if result.shout ~= "" then
-            unexpected:notify("unexpected", result.shout)
-        end
+    local ok, d = pcall(function() return HS:JSONDecode(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/version")) end)
+    if not (ok and type(d) == "table") then return end
+    if d.version ~= currentVersion then
+        unexpected:notify("unexpected", "You are using an old version (current: " .. currentVersion .. ", latest: " .. d.version .. ")")
+    end
+    if d.shout ~= "" then
+        unexpected:notify("unexpected", d.shout)
     end
 end)
 --#localesEnd
