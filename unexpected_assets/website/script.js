@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
 const tb = document.getElementById("tb"),
 esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])),
-const REG = /unexpected:addcmd\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*[^,]+(?:\s*,\s*(\{[^}]*\}))?(?:\s*,\s*(\{[^}]*\}))?/g
+REG = /unexpected:addcmd\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*[^,]+(?:\s*,\s*(\{[^}]*\}))?(?:\s*,\s*(\{[^}]*\}))?/g
 let filter = "all"
 const text = await (await fetch("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source")).text()
 let m, i = 0
