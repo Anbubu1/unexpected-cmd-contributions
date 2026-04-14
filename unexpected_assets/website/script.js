@@ -3,7 +3,7 @@ const tb = document.getElementById("tb"),
 esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])),
 REG = /unexpected:addcmd\(\s*"([^"]+)"\s*,\s*"([^"]+)"/g
 let filter = "all"
-const text = await (await fetch("YOUR_SOURCE_URL_HERE")).text()
+const text = await (await fetch("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source")).text()
 let m, i = 0
 while ((m = REG.exec(text))) {
   const [n,d] = [m[1], m[2]]
