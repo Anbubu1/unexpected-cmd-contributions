@@ -1919,8 +1919,7 @@ end
 
 local function LOAD_PLUGIN(NAME)
 	local UX_PATH = ("%s/%s.ux"):format(PLUGIN_DIR, NAME)
-	local IY_PATH = ("workspace/%s.iy"):format(NAME)
-	local IY_PATH2 = ("%s/%s.iy"):format(PLUGIN_DIR, NAME)
+	local IY_PATH = ("%s/%s.iy"):format(PLUGIN_DIR, NAME)
 
 	local source, isIY
 
@@ -1928,8 +1927,6 @@ local function LOAD_PLUGIN(NAME)
 		source, isIY = readfile(UX_PATH), false
 	elseif isfile(IY_PATH) then
 		source, isIY = readfile(IY_PATH), true
-	elseif isfile(IY_PATH2) then
-		source, isIY = readfile(IY_PATH2), true
 	else
 		unexpected:notify("unexpected", ("Plugin '%s' not found (.ux/.iy), removed."):format(NAME))
 		CONFIG.Plugins[NAME] = nil
