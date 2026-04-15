@@ -10,10 +10,13 @@ queueteleport = missing("function", queue_on_teleport or (syn and syn.queue_on_t
 uxgetcustomasset = missing("function", getcustomasset or getsynasset)
 
 COREGUI = cloneref(game:GetService("CoreGui"))
+STARTERGUI = cloneref(game:GetService("StarterGui"))
 PLRS = cloneref(game:GetService("Players"))
 UIS = cloneref(game:GetService("UserInputService"))
 RS = cloneref(game:GetService("RunService"))
 GS = cloneref(game:GetService("GuiService"))
+GRPS = cloneref(game:GetService("GroupService"))
+TEAMS = cloneref(game:GetService("Teams"))
 LP = cloneref(PLRS.LocalPlayer)
 TS = cloneref(game:GetService("TweenService"))
 HS = cloneref(game:GetService("HttpService"))
@@ -29,6 +32,12 @@ end
 
 SETUPCHAR(LP.Character or LP.CharacterAdded:Wait())
 LP.CharacterAdded:Connect(SETUPCHAR)
+
+function isR15(plr)
+	if plr.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R15 then
+		return true
+	end
+end
 
 local uxassets = {
 	["unexpected_assets/menu.png"] = "rbxassetid://10734887784",
@@ -430,19 +439,27 @@ function unexpected:addcmd(name, desc, func, aliases, usageArgs)
 	local entry = {
 		Original = actualName,
 		Description = desc,
-		Execute = func,
 		Aliases = aliases,
 		UsageArgs = usageArgs,
 		DisplayName = displayName,
 	}
 	entry._lowerOriginal = string.lower(actualName)
 	entry._lowerAliases = {}
-	for _, alias in ipairs(aliases) do table.insert(entry._lowerAliases, string.lower(alias)) end
+	for _, alias in ipairs(aliases) do
+		table.insert(entry._lowerAliases, string.lower(alias))
+	end
+	entry.Execute = function(...)
+		local ok, err = pcall(func, ...)
+		if not ok then
+			warn("[CMD ERROR] " .. actualName .. ": " .. tostring(err))
+		end
+	end
 	commandListData[entry._lowerOriginal] = entry
-	for _, l in ipairs(entry._lowerAliases) do commandListData[l] = entry end
+	for _, l in ipairs(entry._lowerAliases) do
+		commandListData[l] = entry
+	end
 	table.insert(commandListArray, entry)
 end
-
 function execmd(cmdName, ...)
 	local cmd = commandListData[string.lower(cmdName)]
 	if cmd then cmd.Execute(...) end
@@ -3209,6 +3226,180 @@ end, nil, {...})
 unexpected:addcmd("execmd", "Execute command", function(cmdName, ...)
 	execmd(cmdName, ...)
 end, nil, {"command", ...})
+
+unexpected:addcmd("enable", "Enable Visibility of a CoreGui", function(what)
+	local input = what and what:lower(); if not input then return end
+	if input == "reset" then
+		STARTERGUI:SetCore("ResetButtonCallback", true)
+		return
+	end
+	local t = coreGuiTypeNames[input]
+	if t then STARTERGUI:SetCoreGuiEnabled(t, true) end
+end, nil, {"inventory/playerlist/chat/reset/emote/all"})
+
+unexpected:addcmd("disable", "Disable Visibility of a CoreGui", function(what)
+	local input = what and what:lower(); if not input then return end
+	if input == "reset" then
+		STARTERGUI:SetCore("ResetButtonCallback", false)
+		return
+	end
+	local t = coreGuiTypeNames[input]
+	if t then STARTERGUI:SetCoreGuiEnabled(t, false) end
+end, nil, {"inventory/playerlist/chat/reset/emote/all"})
+
+unexpected:addcmd("creatorid", "Copy the creator's ID", function()
+	local id = game.CreatorType == Enum.CreatorType.User and game.CreatorId or game.CreatorType == Enum.CreatorType.Group and GRPS:GetGroupInfoAsync(game.CreatorId).Owner.Id
+	if id then 
+		setclipboard(id)
+		unexpected:notify("Creator ID", id) 
+	end
+end)
+
+unexpected:addcmd("render", "Enable or disable 3D rendering", function(state)
+	if state ~= "true" and state ~= "false" then return unexpected:notify("render", "Usage: render true/false") end
+	RS:Set3dRenderingEnabled(state)
+	unexpected:notify("render", "3D rendering: " .. tostring(state))
+end, nil, {"true/false"})
+
+local r6 = {"27789359","30196114","248263260","45834924","33796059","28488254","52155728"}
+local r15 = {"3333432454","4555808220","4049037604","4555782893","10214311282","10714010337","10713981723","10714372526","10714076981","10714392151","11444443576"}
+unexpected:addcmd("dance", "No description", function()
+	pcall(execmd, "undance")
+	local list = isR15(LP) and r15 or r6
+	local anim = Instance.new("Animation")
+	anim.AnimationId = "rbxassetid://" .. list[math.random(#list)]
+	local hum = CHAR:FindFirstChildWhichIsA("Humanoid")
+	danceTrack = hum:LoadAnimation(anim)
+	danceTrack.Looped = true
+	danceTrack:Play()
+end)
+
+unexpected:addcmd("undance", "No description", function()
+	if danceTrack then
+		danceTrack:Stop()
+		danceTrack:Destroy()
+	end
+end)
+
+unexpected:addcmd("sitwalk", "No description", function()
+	local sitID = LP.Character.Animate.sit:FindFirstChildWhichIsA("Animation").AnimationId
+	for _, v in ipairs({"idle","walk","run","jump"}) do
+		for _, a in ipairs(LP.Character.Animate[v]:GetDescendants()) do
+			if a:IsA("Animation") then
+				a.AnimationId = sitID
+			end
+		end
+	end
+	LP.Character:FindFirstChildWhichIsA("Humanoid").HipHeight = isR15(LP) and 0.5 or -1.5
+end)
+
+unexpected:addcmd("nosit", "No sit", function(state)
+	if state ~= "true" and state ~= "false" then return unexpected:notify("nosit", "Usage: nosit true/false") end
+	HUM:SetStateEnabled(Enum.HumanoidStateType.Seated, state)
+end, nil, {"true/false"})
+
+unexpected:addcmd("infinitejump", "Toggle infinite jump (true/false)", function(state)
+	if state ~= "true" and state ~= "false" then return unexpected:notify("infinitejump", "Usage: infinitejump true/false") end
+	local enable = state == "true"
+	if infJump then infJump:Disconnect() end
+	infJumpDebounce = false
+	if enable then
+		infJump = UIS.JumpRequest:Connect(function()
+			if infJumpDebounce then return end
+			infJumpDebounce = true
+			if HUM then HUM:ChangeState(Enum.HumanoidStateType.Jumping) end
+			task.wait()
+			infJumpDebounce = false
+		end)
+	end
+end, {"infjump"}, {"true/false"})
+
+unexpected:addcmd("team", "Switch team", function(teamN)
+	local teamName = teamN and teamN:lower()
+	local team
+	for _, v in ipairs(TEAMS:GetChildren()) do
+		if v.Name:lower():find(teamName) then
+			team = v
+			break
+		end
+	end
+	if not team then
+		return unexpected:notify("team", "Invalid team: " .. tostring(teamName))
+	end
+	if HRP and firetouchinterest then
+		for _, v in ipairs(WS:GetDescendants()) do
+			if v:IsA("SpawnLocation") and v.TeamColor == team.TeamColor and v.AllowTeamChangeOnTouch then
+				firetouchinterest(v, HRP, 0)
+				firetouchinterest(v, HRP, 1)
+				return
+			end
+		end
+	else
+		LP.Team = team
+	end
+end, nil, {"teamname"})
+
+unexpected:addcmd("spasm", "Toggle spasm (true/false)", function(state)
+	if isR15(LP) then return notify("R6 Required", "This command requires R6") end
+	if state ~= "true" and state ~= "false" then return unexpected:notify("spasm", "Usage: spasm true/false") end
+	if not HUM then return end
+	if Spasm then
+		Spasm:Stop()
+		Spasm = nil
+	end
+	if SpasmAnim then
+		SpasmAnim:Destroy()
+		SpasmAnim = nil
+	end
+	if state == "true" then
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://33796059"
+		SpasmAnim = anim
+		Spasm = HUM:LoadAnimation(anim)
+		Spasm:Play()
+		Spasm:AdjustSpeed(99)
+	end
+end, nil, {"true/false"})
+
+unexpected:addcmd("enableanim", "Enable or disable animation", function(state)
+	if state ~= "true" and state ~= "false" then return unexpected:notify("enableanim", "Usage: enableanim true/false") end
+	CHAR.Animate.Disabled = state
+end, nil, {"true/false"})
+
+unexpected:addcmd("animation", "Play animation by id", function(id, speed)
+	id = tostring(id)
+	if not id:match("%d+") then return unexpected:notify("animation", "Usage: animation [id] [speed]") end
+	speed = tonumber(speed)
+	if not HUM then return end
+	local animid = id:match("rbxassetid://") and id or ("rbxassetid://" .. id)
+	if anim2track then animid = anim2track(animid) end
+	local animObj = Instance.new("Animation")
+	animObj.AnimationId = animid
+	local track = HUM:LoadAnimation(animObj)
+	track.Priority = Enum.AnimationPriority.Movement
+	track:Play()
+	if speed then track:AdjustSpeed(speed) end
+end, {"anim"}, {"id", "speed"})
+
+unexpected:addcmd("emote", "Play emote by id", function(id, speed)
+	local anim = HUM:PlayEmoteAndGetAnimTrackById(id)
+	if speed then anim:AdjustSpeed(tonumber(speed)) end
+end, {"em"}, {"id", "speed"})
+
+unexpected:addcmd("animspeed", "Change animation speed", function(speed)
+	for i,v in next, HUM:GetPlayingAnimationTracks() do v:AdjustSpeed(tonumber(speed or 1)) end
+end, nil, {"speed"})
+
+unexpected:addcmd("stopanimations", "Stop all playing animations", function()
+	for i,v in next, HUM:GetPlayingAnimationTracks() do v:Stop() end
+end, {"stopanims"}, nil)
+
+unexpected:addcmd("refreshanimations", "No description", function()
+	if not HUM or not CHAR or not CHAR:FindFirstChild("Animate") then return notify('Refresh Animations', 'Failed to get Animate/Humanoid') end
+	CHAR.Animate.Disabled = true
+	for _, v in ipairs(HUM:GetPlayingAnimationTracks()) do v:Stop() end
+	CHAR.Animate.Disabled = false
+end, {"refreshanimation", "refreshanims", "refreshanim"})
 
 hookEvents()
 hookBinds()
