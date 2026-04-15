@@ -2498,6 +2498,27 @@ unexpected:addcmd("goto", "Teleport to a player", function(name)
 	if root then HRP.CFrame = root.CFrame + Vector3.new(0, 3, 0) end
 end, nil, {"player"})
 
+unexpected:addcmd("walkto", "Walk to a player", function(name)
+	local name = name:lower()
+	local target
+	if name == "random" then
+		local t = {} for _, p in ipairs(PLRS:GetPlayers()) do if p ~= LP then t[#t+1] = p end end
+		target = #t > 0 and t[math.random(#t)] or nil
+	else
+		for _, p in ipairs(PLRS:GetPlayers()) do
+			if p.Name:lower() == name or p.DisplayName:lower() == name then target = p break end
+		end
+	end
+	local root = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	
+	local myRoot = HRP
+	if not myRoot then return end
+	local pos = root.Position
+	local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum:MoveTo(pos + Vector3.new(0, 0, 3)) else myRoot.CFrame = CFrame.new(pos + Vector3.new(0, 0, 3)) end
+end, nil, {"player"})
+
 local tweenSpeed = 1
 unexpected:addcmd("tweengoto", "Smoothly tween to a player", function(name)
 	if not name or name == "" then return unexpected:notify("tweengoto", "Usage: tweengoto [player]") end
@@ -2703,7 +2724,7 @@ unexpected:addcmd("walktowaypoint", "Walk to a waypoint", function(name)
 		end
 	end
 	unexpected:notify("walktowaypoint", "Waypoint not found: " .. name)
-end, {"wtwp", "walkto"}, {"name"})
+end, {"wtwp", "walktowp"}, {"name"})
 
 unexpected:addcmd("deletewaypoint", "Delete a saved waypoint", function(name)
 	if not name or name == "" then return unexpected:notify("deletewaypoint", "Usage: deletewaypoint [name]") end
