@@ -3221,11 +3221,11 @@ end)
 
 unexpected:addcmd("execute", "Execute code", function(...)
 	loadstring(...)()
-end, nil, {...})
+end, nil, {"..."})
 
 unexpected:addcmd("execmd", "Execute command", function(cmdName, ...)
 	execmd(cmdName, ...)
-end, nil, {"command", ...})
+end, nil, {"command", "..."})
 
 unexpected:addcmd("enable", "Enable Visibility of a CoreGui", function(what)
 	local input = what and what:lower(); if not input then return end
