@@ -3527,7 +3527,7 @@ unexpected:addcmd("[REMOTE] kill", "Kill a player via remote abuse", function(pl
 		end
 	end
 	unexpected:notify("[REMOTE] kill", "Player not found: " .. player)
-end, {"nil"}, {"player"})
+end, nil, {"player"})
 
 hookEvents()
 hookBinds()
