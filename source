@@ -109,7 +109,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {}
-local currentVersion = "v1.3.1"
+local currentVersion = "v1.3.2"
 
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
