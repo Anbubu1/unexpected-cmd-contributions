@@ -1,5 +1,3 @@
-add the [REMOTE]
-
 document.addEventListener("DOMContentLoaded", async () => {
 const tb = document.getElementById("tb"),
 esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])),
