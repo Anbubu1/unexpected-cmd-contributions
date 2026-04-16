@@ -3626,6 +3626,10 @@ unexpected:addcmd("quirkycmd", "A script that abuses vulnerabilities", function(
 	loadstring(game:HttpGet("https://gist.github.com/someunknowndude/38cecea5be9d75cb743eac8b1eaf6758/raw"))()
 end, {"febypass"})
 
+unexpected:addcmd("simplespy", "Spies on remotes.", function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/unexpected_assets/scripts/simplespy"))()
+end, {"remotespy"})
+
 hookEvents()
 hookBinds()
 migrateBinds()
