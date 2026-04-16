@@ -1739,7 +1739,17 @@ local function showPILL(yn)
 	end
 end
 
-indicator.MouseButton1Click:Connect(function() showPILL() end)
+indicator.MouseButton1Click:Connect(function()
+	showPILL()
+	MENUON = true
+	MENUFRAME.Size, MENUFRAME.Visible = UDim2.new(0, 339, 0, 0), true
+	playTween(unexpected_UI["PILL"], { Size = UDim2.new(0, 339, 0, 71) }, 0.25, Enum.EasingStyle.Quint):Play()
+	local NS = UDim2.new(0, 230, 0, 54)
+	playTween(CLI, { Size = NS }, 0.25, Enum.EasingStyle.Quint):Play()
+	playTween(unexpected_UI["PREDICTOR"], { Size = NS }, 0.25, Enum.EasingStyle.Quint):Play()
+	playTween(MENUFRAME, { Size = UDim2.new(0, 339, 0, 348) }, 0.25, Enum.EasingStyle.Quint):Play()
+	buttonTP(MENU, 0)
+end)
 CLI.Focused:Connect(function() LASTFOCUSED = os.clock() end)
 CLI.FocusLost:Connect(function()
 	LASTFOCUSED = os.clock()
@@ -3555,10 +3565,10 @@ local function scan(obj)
     end
 end
 
-unexpected:addcmd("[REMOTE] check","Check for vulnerable remotes [Might trigger Anticheats]", function()
+unexpected:addcmd("[QUIRKY] check","Check for vulnerable remotes [Might trigger Anticheats]", function()
     CLI.Text = ""
 	suggestion = ""
-	unexpected:notify("remote","Checking... This may trigger anticheat systems.")
+	unexpected:notify("remote","Credits to 'quirkycmd' for the method!")
 	scan(RPS)
     scan(LP:FindFirstChildOfClass("PlayerGui"))
     scan(WS)
@@ -3575,30 +3585,30 @@ unexpected:addcmd("[REMOTE] check","Check for vulnerable remotes [Might trigger 
 end,{"febypass"})
 
 function delete(instance)
-	if not found then return unexpected:notify("[REMOTE] delete", "Run 'check' command first.") end
+	if not found then return unexpected:notify("[QUIRKY] delete", "Run 'check' command first.") end
 	found:FireServer(instance, useSegway and {Value = instance} or nil )
-	unexpected:notify("[REMOTE] delete", "deleted instance " .. instance.Name)
+	unexpected:notify("[QUIRKY] delete", "deleted instance " .. instance.Name)
 end
 
-unexpected:addcmd("[REMOTE] delete", "Delete an instance via remote abuse", function(instance)
+unexpected:addcmd("[QUIRKY] delete", "Delete an instance via remote abuse", function(instance)
 	delete(instance)
 end, {"del"}, {"name"})
 
-unexpected:addcmd("[REMOTE] kill", "Kill a player via remote abuse", function(player)
-	if not player then return unexpected:notify("[REMOTE] kill", "Usage: [REMOTE] kill [player]") end
+unexpected:addcmd("[QUIRKY] kill", "Kill a player via remote abuse", function(player)
+	if not player then return unexpected:notify("[QUIRKY] kill", "Usage: [QUIRKY] kill [player]") end
 	for _, p in ipairs(PLRS:GetPlayers()) do
 		if p.Name:lower() == player:lower() or p.DisplayName:lower() == player:lower() then
 			if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
 				delete(p.Character.HumanoidRootPart)
-				unexpected:notify("[REMOTE] kill", "Killed " .. p.Name)
+				unexpected:notify("[QUIRKY] kill", "Killed " .. p.Name)
 				return
 			else
-				unexpected:notify("[REMOTE] kill", p.Name .. " has no character.")
+				unexpected:notify("[QUIRKY] kill", p.Name .. " has no character.")
 				return
 			end
 		end
 	end
-	unexpected:notify("[REMOTE] kill", "Player not found: " .. player)
+	unexpected:notify("[QUIRKY] kill", "Player not found: " .. player)
 end, nil, {"player"})
 
 hookEvents()
