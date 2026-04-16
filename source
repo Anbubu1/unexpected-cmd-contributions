@@ -3448,7 +3448,7 @@ end, nil, {"true/false"})
 
 local gear = LP:WaitForChild("StarterGear",1)
 local found
-local words = {"delete","remove","destroy","clean","clear","bullet","shoot","fire","segway","sword","attack","despawn","apagar","löschen","supprimer","eliminar","消去","删除","삭제"}
+local words = {"delete", "remove", "destroy", "clean", "clear", "bullet", "bala", "shoot", "shot", "fire", "segway", "handless", "sword", "attack", "despawn", "deletar", "apagar", "handto", "close", "löschen", "supprimer", "eliminar", "cancella", "entfernen", "enlever", "remover", "rimuovere", "zerstören", "détruire", "destruir", "distruggere", "reinigen", "nettoyer", "limpiar", "limpar", "pulire", "effacer", "borrar", "eliminare", "Geschoss", "balle", "proiettile", "schießen", "tirer", "disparar", "atirar", "sparare", "Schuss", "coup", "disparo", "tiro", "colpo", "feuer", "feu", "fuego", "fogo", "fuoco", "Segway", "handlos", "sans mains", "sin manos", "sem mãos", "senza mani", "schwert", "épée", "espada", "spada", "angriff", "attaque", "ataque", "attacco", "verschwinden", "disparaître", "desaparecer", "sparire", "消去", "削除", "破壊", "清掃", "クリア", "删除", "清除", "销毁", "清理", "手無", "無手", "手なし", "剣", "刀", "剑", "攻撃", "アタック", "攻击", "消失", "死去", "关闭", "關閉", "閉じる", "삭제", "제거", "파괴", "청소", "비우기", "suprimir", "canceller", "annettere"}
 local function valid(n)
     n = n:lower()
     for _,w in ipairs(words) do
