@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const tb = document.getElementById("tb"),
-  esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])),
-  REG = /unexpected:addcmd\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*,\s*function[\s\S]*?end\s*(?:,\s*(nil|\{[\s\S]*?\}))?(?:,\s*(nil|\{[\s\S]*?\}))?\s*\)/g
+  esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))
   let filter = "all"
   const text = await (await fetch("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source")).text()
-  let m, i = 0
+  let i = 0
   const seen = new Set()
   const parseTable = t =>
     t ? [...t.matchAll(/"([^"]+)"/g)].map(x => x[1]) : []
@@ -33,33 +32,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     tb.appendChild(tr)
     i++
   }
-  while ((m = REG.exec(text))) {
-    let [_, rawName, d, aRaw, uRaw] = m
+  const blocks = text.split("unexpected:addcmd(")
+  for (let j = 1; j < blocks.length; j++) {
+    const chunk = blocks[j]
+    const header = chunk.match(/^"([^"]+)"\s*,\s*"([^"]+)"\s*,/)
+    if (!header) continue
+    let rawName = header[1]
+    let desc = header[2]
     const isClient = /^\[CLIENT\]/i.test(rawName)
     const n = rawName.replace(/^\[CLIENT\]\s*/i, "")
     const key = n.toLowerCase()
     if (seen.has(key)) continue
     seen.add(key)
-    const aliases = (!aRaw || aRaw === "nil") ? [] : parseTable(aRaw)
-    const args = (!uRaw || uRaw === "nil") ? [] : parseTable(uRaw)
-    makeRow(n, d, isClient, aliases, args)
+    const argsMatch = chunk.match(/,\s*nil\s*,\s*(\{[\s\S]*?\})/)
+    const uRaw = argsMatch ? argsMatch[1] : null
+    const aliasesMatch = chunk.match(/,\s*\{([\s\S]*?)\}/)
+    const aRaw = aliasesMatch ? aliasesMatch[1] : null
+    const aliases = aRaw ? parseTable(aRaw) : []
+    const args = uRaw ? parseTable(uRaw) : []
+    makeRow(n, desc, isClient, aliases, args)
     const rawU = (uRaw || "").toLowerCase()
     const hasBool =
       rawU.includes("true/false") ||
-      args.some(a => a.toLowerCase().includes("true/false")) ||
-      args.some(a => /true|false/.test(a.toLowerCase()))
+      rawU.includes("true") ||
+      rawU.includes("false") ||
+      args.some(a => /true|false|true\/false/i.test(a))
     if (hasBool && !key.startsWith("un")) {
       const unName = "un" + n
       const unKey = unName.toLowerCase()
       if (!seen.has(unKey)) {
         seen.add(unKey)
-        makeRow(
-          unName,
-          "[unshit] Disable " + n,
-          isClient,
-          [],
-          []
-        )
+        makeRow(unName, "[unshit] Disable " + n, isClient, [], [])
       }
     }
   }
@@ -82,7 +85,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (show) {
         shown++
         if (a) {
-          tr.style.animation = "none"; tr.offsetHeight
+          tr.style.animation = "none"
+          tr.offsetHeight
           tr.style.animation = ""
           tr.style.animationDelay = i * 15 + "ms"
           tr.style.animationName = "fadeUp"
@@ -95,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("q").oninput = () => upd(0)
   document.querySelectorAll(".fb").forEach(b =>
     b.onclick = () => {
-      document.querySelectorAll(".fb").forEach(x=>x.classList.remove("on"))
+      document.querySelectorAll(".fb").forEach(x => x.classList.remove("on"))
       b.classList.add("on")
       filter = b.dataset.f
       upd(1)
