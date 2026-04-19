@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const unKey = unName.toLowerCase()
       if (!seen.has(unKey)) {
         seen.add(unKey)
-        makeRow(unName, "[unshit] Disable " + n, isClient, [], [])
+        makeRow(unName, "[uncmds] Disable " + n, isClient, [], [])
       }
     }
   }
