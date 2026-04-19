@@ -116,7 +116,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {}
-local currentVersion = "v1.4.5"
+local currentVersion = "v1.4.6"
 
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
@@ -1024,20 +1024,6 @@ local function rgbRows()
 	end
 end
 
-unexpected_UI.SETTINGS_BUTTON.MouseButton1Click:Connect(function()
-	openMenuFrame(MENUFRAMES.settings, function()
-		_fadeTargets[MENUFRAMES.settings] = nil
-		rgbRows()
-	end)
-end)
-unexpected_UI.STBACK.MouseButton1Click:Connect(function()
-	_fadeTargets[MENUFRAMES.settings] = nil
-	fadeOut(MENUFRAMES.settings)
-	for _, c in ipairs(unexpected_UI.STSCROLL:GetChildren()) do
-		if not c:IsA("UIListLayout") and not c:IsA("UIPadding") then c:Destroy() end
-	end
-	task.delay(0.1, returnToMenu) -- why tf did i put function() end in old code
-end)
 
 local function showcmdList()
 	clearcmdList()
@@ -1266,6 +1252,27 @@ for k, v in pairs({
 		renderList(k)
 	end)
 end
+
+unexpected_UI.SETTINGS_BUTTON.MouseButton1Click:Connect(function()
+	_fadeTargets[MENUFRAMES.settings] = nil
+	stACTIVETAB("settings")
+	renderList("settings")
+	rgbRows()
+end)
+
+MENUS[1].MouseButton1Click:Connect(function()
+	stACTIVETAB("command", showcmdList)
+end)
+
+unexpected_UI.STBACK.MouseButton1Click:Connect(function()
+	_fadeTargets[MENUFRAMES.settings] = nil
+	fadeOut(MENUFRAMES.settings)
+	for _, c in ipairs(unexpected_UI.STSCROLL:GetChildren()) do
+		if not c:IsA("UIListLayout") and not c:IsA("UIPadding") then c:Destroy() end
+	end
+	task.delay(0.1, returnToMenu) -- why tf did i put function() end in old code
+end)
+
 unexpected_UI["PILL"].InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseMovement then
 		shithover = true
@@ -1301,10 +1308,6 @@ MENU.MouseButton1Click:Connect(function()
 		collapse.Completed:Once(function() if not MENUON then MENUFRAME.Visible = false end end)
 		SHS(HOVERED)
 	end
-end)
-
-MENUS[1].MouseButton1Click:Connect(function()
-	openMenuFrame(MENUFRAMES.command, function() showcmdList() end)
 end)
 MENUFRAMES.command:WaitForChild("commandBack").MouseButton1Click:Connect(function()
 	fadeOut(MENUFRAMES.command)
