@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const tb = document.getElementById("tb"),
-  esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))
+    esc = s => s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))
   let filter = "all"
   const text = await (await fetch("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/source")).text()
   let i = 0
@@ -20,18 +20,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       <td><span class="desc">${esc(desc)}</span></td>
       <td>${
         aliases.length
-          ? `<div class="tags">${aliases.map(x=>`<span class="tag ta">${esc(x)}</span>`).join("")}</div>`
+          ? `<div class="tags">${aliases.map(x => `<span class="tag ta">${esc(x)}</span>`).join("")}</div>`
           : `<span class="tn">—</span>`
       }</td>
       <td>${
         args.length
-          ? `<div class="tags">${args.map(x=>`<span class="tag tg">[${esc(x)}]</span>`).join("")}</div>`
+          ? `<div class="tags">${args.map(x => `<span class="tag tg">[${esc(x)}]</span>`).join("")}</div>`
           : `<span class="tn">—</span>`
       }</td>
     `
     tb.appendChild(tr)
     i++
   }
+  const hasUn = new Set(
+    [...text.matchAll(/"([^"]+)"/g)]
+      .map(m => m[1])
+      .filter(n => /^un/i.test(n))
+      .map(n => n.toLowerCase())
+  )
   const blocks = text.split("unexpected:addcmd(")
   for (let j = 1; j < blocks.length; j++) {
     const chunk = blocks[j]
@@ -60,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (hasBool && !key.startsWith("un")) {
       const unName = "un" + n
       const unKey = unName.toLowerCase()
-      if (!seen.has(unKey)) {
+      if (!seen.has(unKey) && !hasUn.has(unKey)) {
         seen.add(unKey)
         makeRow(unName, "[uncmds] Disable " + n, isClient, [], [])
       }
