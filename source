@@ -93,8 +93,11 @@ local function mk(class, parent, props)
 	return o
 end
 
+local UICornerTABLE = {}
 local function CREATE_CORNER(PARENT, RADIUS_SCALE, RADIUS_OFFSET)
-	return mk("UICorner", PARENT, { CornerRadius = UDim.new(RADIUS_SCALE or 0, RADIUS_OFFSET or 0) })
+	local corner = mk("UICorner", PARENT, { CornerRadius = UDim.new(RADIUS_SCALE or 0, RADIUS_OFFSET or 0) })
+	table.insert(UICornerTABLE, { corner = corner, scale = RADIUS_SCALE or 0, offset = RADIUS_OFFSET or 0 })
+	return corner
 end
 
 local function CREATE_STROKE(PARENT, COLOR, APPLY_MODE)
@@ -109,7 +112,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {}
-local currentVersion = "v1.4.0" --mobile support
+local currentVersion = "v1.4.1" --uicorner setting
 
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
@@ -849,7 +852,8 @@ local defaultConfig = {
 	Events = {},
 	Binds = {},
 	Colors = {},
-	Waypoints = {}
+	Waypoints = {},
+	UICornerScale = 1
 }
 
 CONFIG = CONFIG or {}
@@ -1077,6 +1081,15 @@ local function updateIndicatorS(newSize)
 	UX_config()
 end
 
+function updateUICorners(newSize)
+	UICornersS = tonumber(newSize) or 1
+	UICornersS = math.clamp(UICornersS, 0, 1)
+	for _, data in ipairs(UICornerTABLE) do
+		data.corner.CornerRadius = UDim.new(data.scale * UICornersS, data.offset)
+	end
+	UX_config()
+end
+
 local function rgbRows()
 	for _, c in ipairs(unexpected_UI.STSCROLL:GetChildren()) do
 		if not c:IsA("UIListLayout") and not c:IsA("UIPadding") then c:Destroy() end
@@ -1089,6 +1102,19 @@ local function rgbRows()
 	sizeBox.FocusLost:Connect(function()
 		updateIndicatorS(sizeBox.Text)
 		sizeBox.Text = tostring(indicatorS)
+	end)
+	local cornerRow = mk("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
+	mk("TextLabel", cornerRow, { Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1, Text = "uicorners scale", TextColor3 = FQ.COLORS.TEXT_MAIN, TextSize = 16, FontFace = FQ.FONTS.REGULAR, TextXAlignment = Enum.TextXAlignment.Left, BorderSizePixel = 0 })
+	local cornerBox = mk("TextBox", cornerRow, { Size = UDim2.new(0,120,0,30), Position = UDim2.new(1,-120,0.5,-15), BackgroundColor3 = FQ.COLORS.BACKGROUND, TextColor3 = FQ.COLORS.TEXT_MAIN, PlaceholderColor3 = FQ.COLORS.TEXT_DIM, PlaceholderText = "scale", Text = tostring(CONFIG.UICornerScale or 1), TextSize = 14, FontFace = FQ.FONTS.REGULAR, BorderSizePixel = 0, ClearTextOnFocus = false })
+	CREATE_CORNER(cornerBox, 0.1, 0)
+	CREATE_STROKE(cornerBox, FQ.COLORS.STROKE)
+	cornerBox.FocusLost:Connect(function()
+		local scale = tonumber(cornerBox.Text) or 1
+		scale = math.clamp(scale, 0, 1)
+		CONFIG.UICornerScale = scale
+		updateUICorners(scale)
+		cornerBox.Text = tostring(scale)
+		UX_config()
 	end)
 	for _, def in ipairs(COLOR_KEYS) do
 		local row = mk("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
@@ -1180,8 +1206,9 @@ local function showcmdList()
 			Size = UDim2.new(0,300,0,0),
 			BorderSizePixel = 0,
 		})
-		mk("UIStroke", _sharedTooltip, { ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = FQ.COLORS.STROKE })
-		mk("UICorner", _sharedTooltip, { CornerRadius = UDim.new(0.1, 0) })
+		CREATE_STROKE(_sharedTooltip, FQ.COLORS.STROKE)
+		CREATE_CORNER(_sharedTooltip, 0.1, 0)
+		updateUICorners(CONFIG.UICornerScale or 1)
 		mk("UIPadding", _sharedTooltip, { PaddingBottom = UDim.new(0,6), PaddingLeft = UDim.new(0,8), PaddingRight = UDim.new(0,8) })
 		mk("UITextSizeConstraint", _sharedTooltip, { MaxTextSize = 18 })
 		_localGuiInset = GS:GetGuiInset()
@@ -1853,6 +1880,9 @@ end)
 UX_rconfig()
 if type(CONFIG.indicatorS) == "number" then
 	updateIndicatorS(CONFIG.indicatorS)
+end
+if type(CONFIG.UICornerScale) == "number" then
+	updateUICorners(CONFIG.UICornerScale)
 end
 if type(CONFIG.Colors) == "table" then
 	for key, rgb in pairs(CONFIG.Colors) do
