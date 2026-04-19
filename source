@@ -40,6 +40,13 @@ function isR15(plr)
 	end
 end
 
+local function parseBool(state, default)
+	if state == nil then return default end
+	state = tostring(state):lower()
+	if state == "false" or state == "0" then return false end
+	return true
+end
+
 local uxassets = {
 	["unexpected_assets/menu.png"] = "rbxassetid://10734887784",
 	["unexpected_assets/back.png"] = "rbxassetid://10709812784"
@@ -112,7 +119,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {}
-local currentVersion = "v1.4.3" --commands alphabetical
+local currentVersion = "v1.4.4" --"un" commands
 
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
@@ -2771,18 +2778,13 @@ end, {"tspeed"}, {"speed"})
 
 local noclip
 unexpected:addcmd("noclip", "Toggle walk through walls (true/false)", function(state)
-	local enable
+	local enable = parseBool(state, true)
 	if state then
 		state = string.lower(tostring(state))
-		if state == "true" or state == "1" then
-			enable = true
-		elseif state == "false" or state == "0" then
-			enable = false
-		else
-			enable = not noclip
-		end
+		if state == "false" or state == "0" then enable = false
+		else enable = true end
 	else
-		enable = not noclip
+		enable = true
 	end
 	
 	if enable then
@@ -3473,9 +3475,9 @@ unexpected:addcmd("creatorid", "Copy the creator's ID", function()
 end)
 
 unexpected:addcmd("render", "Enable or disable 3D rendering", function(state)
-	if state ~= "true" and state ~= "false" then return unexpected:notify("render", "Usage: render true/false") end
-	RS:Set3dRenderingEnabled(state)
-	unexpected:notify("render", "3D rendering: " .. tostring(state))
+	local enable = parseBool(state, true)
+	RS:Set3dRenderingEnabled(enable)
+	unexpected:notify("render", "3D rendering: " .. tostring(enable))
 end, nil, {"true/false"})
 
 local r6 = {"27789359","30196114","248263260","45834924","33796059","28488254","52155728"}
@@ -3511,8 +3513,8 @@ unexpected:addcmd("sitwalk", "Set animations to sit", function()
 end)
 
 unexpected:addcmd("nosit", "No sit", function(state)
-	if state ~= "true" and state ~= "false" then return unexpected:notify("nosit", "Usage: nosit true/false") end
-	HUM:SetStateEnabled(Enum.HumanoidStateType.Seated, state)
+	local enable = parseBool(state, true)
+	HUM:SetStateEnabled(Enum.HumanoidStateType.Seated, enable)
 end, nil, {"true/false"})
 
 unexpected:addcmd("exit", "Exit unexpected script", function()
@@ -3532,8 +3534,7 @@ unexpected:addcmd("exit", "Exit unexpected script", function()
 end, {"quit", "unload"})
 
 unexpected:addcmd("infinitejump", "Toggle infinite jump (true/false)", function(state)
-	if state ~= "true" and state ~= "false" then return unexpected:notify("infinitejump", "Usage: infinitejump true/false") end
-	local enable = state == "true"
+	local enable = parseBool(state, true)
 	if infJump then infJump:Disconnect() end
 	infJumpDebounce = false
 	if enable then
@@ -3574,7 +3575,7 @@ end, nil, {"teamname"})
 
 unexpected:addcmd("spasm", "Toggle spasm (true/false)", function(state)
 	if isR15(LP) then return notify("R6 Required", "This command requires R6") end
-	if state ~= "true" and state ~= "false" then return unexpected:notify("spasm", "Usage: spasm true/false") end
+	local enable = parseBool(state, true)
 	if not HUM then return end
 	if Spasm then
 		Spasm:Stop()
@@ -3584,7 +3585,7 @@ unexpected:addcmd("spasm", "Toggle spasm (true/false)", function(state)
 		SpasmAnim:Destroy()
 		SpasmAnim = nil
 	end
-	if state == "true" then
+	if enable == "true" then
 		local anim = Instance.new("Animation")
 		anim.AnimationId = "rbxassetid://33796059"
 		SpasmAnim = anim
@@ -3595,8 +3596,8 @@ unexpected:addcmd("spasm", "Toggle spasm (true/false)", function(state)
 end, nil, {"true/false"})
 
 unexpected:addcmd("enableanim", "Enable or disable animation", function(state)
-	if state ~= "true" and state ~= "false" then return unexpected:notify("enableanim", "Usage: enableanim true/false") end
-	CHAR.Animate.Disabled = state
+	local enable = parseBool(state, true)
+	CHAR.Animate.Disabled = enable
 end, nil, {"true/false"})
 
 unexpected:addcmd("animation", "Play animation by id", function(id, speed)
@@ -3642,8 +3643,8 @@ unexpected:addcmd("trip", "Slip", function()
 end)
 
 unexpected:addcmd("fling", "Enable/disable flinging", function(state)
-	if state ~= "true" and state ~= "false" then return unexpected:notify("fling", "Usage: fling true/false") end
-	if state == "true" then
+	local enable = parseBool(state, true)
+	if enable then
         for _, child in pairs(CHAR:GetDescendants()) do
             if child:IsA("BasePart") then
                 child.CustomPhysicalProperties = PhysicalProperties.new(100, 0.3, 0.5)
@@ -3666,7 +3667,7 @@ unexpected:addcmd("fling", "Enable/disable flinging", function(state)
             flingV.AngularVelocity = Vector3.new(0, 99999, 0)
 			task.wait(.267)
 			flingV.AngularVelocity = Vector3.new(0, 0, 0)
-			task.wait()
+			task.wait(.3)
 		until not flinging
     else
         execmd('clip')
@@ -3686,6 +3687,34 @@ end, {"febypass"})
 unexpected:addcmd("simplespy", "Spies on remotes", function()
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/audio-wav/unexpected-cmd/main/unexpected_assets/scripts/simplespy"))()
 end, {"remotespy"})
+
+unexpected:addcmd("unnoclip", "Disable noclip", function()
+	execmd("noclip", "false")
+end, {"clip"})
+
+unexpected:addcmd("unfling", "Disable fling", function()
+	execmd("fling", "false")
+end)
+
+unexpected:addcmd("uninfinitejump", "Disable infinite jump", function()
+	execmd("infinitejump", "false")
+end, {"uninfjump"})
+
+unexpected:addcmd("unspasm", "Disable spasm", function()
+	execmd("spasm", "false")
+end)
+
+unexpected:addcmd("unnosit", "Re-enable sitting", function()
+	execmd("nosit", "false")
+end)
+
+unexpected:addcmd("rerender", "Re-enable 3D rendering", function()
+	execmd("render", "true")
+end)
+
+unexpected:addcmd("unenableanim", "Re-enable animations", function()
+	execmd("enableanim", "false")
+end)
 
 hookEvents()
 hookBinds()
