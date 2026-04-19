@@ -17,6 +17,7 @@ RS = cloneref(game:GetService("RunService"))
 RPS = cloneref(game:GetService("ReplicatedStorage"))
 GS = cloneref(game:GetService("GuiService"))
 GRPS = cloneref(game:GetService("GroupService"))
+SC = cloneref(game:GetService("ScriptContext"))
 TEAMS = cloneref(game:GetService("Teams"))
 LP = cloneref(PLRS.LocalPlayer)
 TS = cloneref(game:GetService("TweenService"))
@@ -116,7 +117,7 @@ local function CREATE_ASPECT(PARENT, RATIO)
 end
 
 local unexpected_UI = {}
-local currentVersion = "v1.4.8" --importiy
+local currentVersion = "v1.4.9" --importiy
 
 local function randomString(length, charset)
 	length = length or math.random(10, 20)
@@ -2008,21 +2009,31 @@ unexpected:addcmd("onevent", "Add event trigger", function(event, ...)
 	unexpected:notify("events", "Added: " .. event .. (filter and (" [" .. filter .. "]") or "") .. " → " .. cmd)
 end, nil, {"event", "filter/*", "..."})
 
-unexpected:addcmd("unevent", "Remove event trigger", function(event)
-	if not event then return unexpected:notify("events", "Usage: unevent [event]") end
-
+unexpected:addcmd("unevent", "Remove event trigger", function(event, ...)
+	if not event then return unexpected:notify("events", "Usage: unevent [event] [cmd]") end
+	local args = {...}
+	local cmd = #args > 0 and table.concat(args, " ") or nil
 	CONFIG.Events = CONFIG.Events or {}
+	local removed = 0
 	for i = #CONFIG.Events, 1, -1 do
-		if CONFIG.Events[i].event == event:lower() then
-			table.remove(CONFIG.Events, i)
+		local ev = CONFIG.Events[i]
+		if ev.event == event:lower() then
+			if not cmd or ev.cmd == cmd then
+				table.remove(CONFIG.Events, i)
+				removed = removed + 1
+			end
 		end
 	end
 
 	UX_config()
 	hookEvents()
 	if MENUFRAMES.event.Visible then renderList("event") end
-	unexpected:notify("events", "Removed: " .. event)
-end, nil, {"event"})
+	if removed > 0 then
+		unexpected:notify("events", "Removed " .. removed .. ": " .. event .. (cmd and (" → " .. cmd) or ""))
+	else
+		unexpected:notify("events", "No match found for: " .. event .. (cmd and (" → " .. cmd) or ""))
+	end
+end, nil, {"event", "[cmd]"})
 
 unexpected:addcmd("clearevents", "Clear all events", function()
 	CONFIG.Events = {}
@@ -2217,7 +2228,7 @@ unexpected:addcmd("rejoin", "Rejoins the current server", function()
 end)
 
 unexpected:addcmd("autorejoin", "Automatically rejoin when an error occurs", function()
-	GS.ErrorMessageChanged:Connect(function() execmd("rejoin") end)
+	SC.Error:Connect(function(_, _, i) if not i or i == script then execmd("rejoin") end end) --anbubu
 	unexpected:notify("autorejoin", "Auto-rejoin enabled.")
 end, {"autorj"})
 
