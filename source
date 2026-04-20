@@ -83,12 +83,11 @@ local FQ = {
 local BASE_SCALE = {notifUI = 1, PILL = 1}
 local MOBILE_MULT = {notifUI = 0.65,PILL = 0.6}
 
-local function mk(class, parent, props)
-	local o = Instance.new(class, parent)
-	if props then 
-		for k, v in pairs(props) do o[k] = v end 
-	end
-	return o
+local function mk(class: string, parent: Instance?, props: {[string]: any}?)
+    local inst = Instance.new(class)
+    if props then  for k, v in next, props do inst[k] = v end end
+    if parent then inst.Parent = parent end
+    return inst
 end
 
 local function mkBTNEXAMPLE(name)
@@ -121,16 +120,16 @@ end
 
 local unexpected_UI = {}
 local currentVersion = "v1.5.0" --importiy
-
-local function randomString(length, charset)
-	length = length or math.random(10, 20)
-	charset = charset or "abcdefghijklmnopqRStuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	local chars = {}
-	for i = 1, length do
-		local r = math.random(#charset)
-		chars[i] = charset:sub(r, r)
-	end
-	return table.concat(chars)
+local function randomString(len: number?, charset: string?)
+    local _len = len or math.random(10, 20)
+    local buff = buffer.create(_len)
+    local _charset = charset or "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local clen = #_charset
+    for i = 1, _len do
+        local c = string.byte(_charset, math.random(1, clen))
+        buffer.writeu8(buff, i - 1, c)
+    end
+    return buffer.tostring(buff)
 end
 
 unexpected_UI.UI = mk("ScreenGui", gethui() or COREGUI, { Name = randomString() })
@@ -469,17 +468,12 @@ local function clearcmdList()
 end
 
 local _fadeTargets = setmetatable({}, { __mode = "k" })
-local function getfadeTargets(frame)
-	local t = _fadeTargets[frame]
-	if t then return t end
-	t = {}
-	for _, c in ipairs(frame:GetDescendants()) do
-		if c:IsA("TextLabel") or c:IsA("TextButton") or c:IsA("TextBox") or c:IsA("ImageLabel") or c:IsA("ImageButton") then
-			table.insert(t, c)
-		end
-	end
-	_fadeTargets[frame] = t
-	return t
+local function getfadeTargets(frame: Instance)
+    local t = _fadeTargets[frame]
+    if t then return t end
+    t = frame:QueryDescendants("TextLabel,TextButton,TextBox,ImageLabel,ImageButton")
+    _fadeTargets[frame] = t
+    return t
 end
 
 local function playTween(obj, props, time, style)
@@ -526,23 +520,23 @@ notifClose:SetAttribute("dimText", true)
 local activeBarTween = nil
 local notifPos = notifUI.Position
 
-local function notifFadeOut(then_fn)
-	isNotif = false
-	-- minified variable name because its not needed
-	local t = playTween(notifUI, { BackgroundTransparency = 1, Position = notifPos + UDim2.new(0,0,0,10) }, 0.25)
-	for _, v in ipairs(notifUI:GetDescendants()) do
-		if v:IsA("TextLabel") or v:IsA("TextButton") then playTween(v, { TextTransparency = 1 }, 0.25):Play() end
-	end
-	t:Play()
-	task.delay(0.3, function()
-		notifUI.Visible = false
-		notifUI.Position = notifPos
-		notifUI.BackgroundTransparency = 0
-		for _, v in ipairs(notifUI:GetDescendants()) do
-			if v:IsA("TextLabel") or v:IsA("TextButton") then v.TextTransparency = 0 end
-		end
-		if then_fn then then_fn() end
-	end)
+local function notifFadeOut()
+    isNotif = false
+    -- minified variable name because its not needed
+    local t = playTween(notifUI, {BackgroundTransparency = 1,Position = notifPos + UDim2.fromOffset(0, 10)}, 0.25)
+    local query = notifUI:QueryDescendants("TextLabel,TextButton")
+    for _, v in next, query do
+        playTween(v, { TextTransparency = 1 }, 0.25):Play()
+    end
+    t:Play()
+    task.delay(0.3, function(query)
+        notifUI.Visible = false
+        notifUI.Position = notifPos
+        notifUI.BackgroundTransparency = 0
+        for _, v in next, query do
+            v.TextTransparency = 0
+        end
+    end, query)
 end
 
 local function notifQueue()
