@@ -400,7 +400,7 @@ local _sharedTooltipConn = nil
 local _btnPool = {}
 local _btnMeta = setmetatable({}, { __mode = "k" })
 local _pendinguncmds = {}
-function unexpected:addcmd(name, desc, func, aliases, usageArgs)
+function unexpected:addcmd(name, desc, func, aliases, usageArgs, _pluginTag)
 	aliases = aliases or {}
 	usageArgs = usageArgs or {}
 	local displayName = name
@@ -418,6 +418,7 @@ function unexpected:addcmd(name, desc, func, aliases, usageArgs)
 		local ok, err = pcall(func, ...)
 		if not ok then warn("[CMD ERROR] " .. actualName .. ": " .. tostring(err)) end
 	end
+	entry._pluginTag = _pluginTag
 	commandListData[entry._lowerOriginal] = entry
 	for _, l in ipairs(entry._lowerAliases) do commandListData[l] = entry end
 	table.insert(commandListArray, entry)
@@ -1918,13 +1919,13 @@ local function loadPlugin(name, source, isIY)
 				local listName = cmdDef.ListName or cmdKey
 				local usageArgs = {}
 				for arg in listName:gmatch("%[(.-)%]") do usageArgs[#usageArgs+1] = arg end
-				local displayBase = listName:gsub("%s*%[.-%]", ""):match("^%s*(.-)%s*$")
+				local displayBase = (listName:gsub("%s*%[.-%]", ""):match("^%s*([^/]+)%s*") or listName):match("^%s*(.-)%s*$")
 				local aliases = {}
 				if type(cmdDef.Aliases) == "table" then
 					for _, a in ipairs(cmdDef.Aliases) do aliases[#aliases+1] = a end
 				end
 				local fn = cmdDef.Function
-				unexpected:addcmd(displayBase, cmdDef.Description or "No description.", function(...) pcall(fn, {...}, LP) end, aliases, usageArgs)
+				unexpected:addcmd(displayBase, cmdDef.Description or "No description.", function(...) pcall(fn, {...}, LP) end, aliases, usageArgs, name)
 				count = count + 1
 			end
 		end
@@ -1940,8 +1941,8 @@ local function loadPlugin(name, source, isIY)
 		if type(RESULT) == "table" and RESULT.Commands then
 			for CMD_NAME, CMD in pairs(RESULT.Commands) do
 				if type(CMD.Function) == "function" then
-					unexpected:addcmd(CMD.ListName or CMD_NAME, CMD.Description or "No description.", CMD.Function, CMD.Aliases or {}, CMD.Args or {})
-				end
+						unexpected:addcmd(CMD.ListName or CMD_NAME, CMD.Description or "No description.", CMD.Function, CMD.Aliases or {}, CMD.Args or {}, name)
+					end
 			end
 		end
 		unexpected:notify("unexpected", "Loaded plugin: " .. (RESULT and RESULT.PluginName or name))
@@ -1986,7 +1987,26 @@ function addPlugin(args)
 		CONFIG.Plugins[NAME] = true
 		UX_config()
 		if MENUFRAMES.plugin.Visible then renderList("plugin") end
+		if MENUFRAMES.command.Visible then
+			clearcmdList()
+			showcmdList()
+		end
 	end
+end
+
+local function stripPluginCmds(pluginName)
+	local newArray = {}
+	for _, entry in ipairs(commandListArray) do
+		if entry._pluginTag ~= pluginName then
+			table.insert(newArray, entry)
+		else
+			commandListData[entry._lowerOriginal] = nil
+			for _, alias in ipairs(entry._lowerAliases) do
+				commandListData[alias] = nil
+			end
+		end
+	end
+	commandListArray = newArray
 end
 
 function removePlugin(args)
@@ -1994,9 +2014,14 @@ function removePlugin(args)
 	if not NAME or NAME == "" then return unexpected:notify("unexpected", "Usage: unplugin [name]") end
 	if CONFIG.Plugins[NAME] then
 		CONFIG.Plugins[NAME] = nil
+		stripPluginCmds(NAME)
 		UX_config()
-		unexpected:notify("unexpected", "Plugin '" .. NAME .. "' removed.")
+		unexpected:notify("unexpected", "Plugin '" .. NAME .. "' disabled.")
 		if MENUFRAMES.plugin.Visible then renderList("plugin") end
+		if MENUFRAMES.command.Visible then
+			clearcmdList()
+			showcmdList()
+		end
 	else
 		unexpected:notify("unexpected", "Plugin '" .. NAME .. "' is not enabled.")
 	end
@@ -2056,7 +2081,7 @@ unexpected:addcmd("plugin", "Add a plugin", function(NAME)
 	if MENUFRAMES.plugin.Visible then renderList("plugin") end
 end, nil, {"name"})
 
-unexpected:addcmd("unplugin", "Remove a plugin", function(NAME) 
+unexpected:addcmd("unplugin", "Disable a plugin", function(NAME) 
 	removePlugin({name = NAME}) 
 	if MENUFRAMES.plugin.Visible then renderList("plugin") end
 end, nil, {"name"})
@@ -2068,11 +2093,11 @@ unexpected:addcmd("reloadplugin", "Reload a plugin", function(NAME)
 	if MENUFRAMES.plugin.Visible then renderList("plugin") end
 end, nil, {"name"})
 
-unexpected:addcmd("clearplugins", "Remove all plugins", function()
+unexpected:addcmd("clearplugins", "Disable all plugins", function()
 	CONFIG.Plugins = {}
 	UX_config()
 	if MENUFRAMES.plugin.Visible then renderList("plugin") end
-	unexpected:notify("plugins", "All plugins cleared.")
+	unexpected:notify("plugins", "All plugins disabled.")
 end)
 
 unexpected:addcmd("addallplugins", "Load all available plugins", function()
@@ -3311,6 +3336,21 @@ local function fetchRemote()
 	return nil
 end
 
+local function installedpluginsscan()
+	table.clear(_installedPlugins)
+	if listfiles then
+		for _, dir in ipairs({"unexpected_plugins", "."}) do
+			pcall(function()
+				if dir == "unexpected_plugins" and not isfolder("unexpected_plugins") then return end
+				for _, f in ipairs(listfiles(dir)) do
+					local n = f:match("([^/]+)%.iy$")
+					if n then _installedPlugins[n] = true end
+				end
+			end)
+		end
+	end
+end
+
 local function fetchStore()
 	local raw = nil
 	if isfile and readfile and isfile("unexpected_store_cache.json") then raw = readfile("unexpected_store_cache.json") end
@@ -3345,19 +3385,7 @@ local function fetchStore()
 		return (a._t or 0) > (b._t or 0)
 	end)
 
-	table.clear(_installedPlugins)
-
-	if listfiles then
-		for _, dir in ipairs({"unexpected_plugins", "."}) do
-			pcall(function()
-				if dir == "unexpected_plugins" and not isfolder("unexpected_plugins") then return end
-				for _, f in ipairs(listfiles(dir)) do
-					local n = f:match("([^/]+)%.iy$")
-					if n then _installedPlugins[n] = true end
-				end
-			end)
-		end
-	end
+	installedpluginsscan()
 end
 
 local function storeItems_init()
