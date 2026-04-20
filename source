@@ -825,6 +825,7 @@ UIS.InputBegan:Connect(function(input)
 			pillDrag, pillWDrag = true, false
 			pillMouseStart = UIS:GetMouseLocation()
 			pillStartPos = unexpected_UI["PILL"].Position
+			LASTFOCUSED = os.clock()  -- ADD THIS
 		end
 	end
 end)
@@ -846,6 +847,7 @@ UIS.InputChanged:Connect(function(input)
 			if pillWDrag then
 				local sf = MOBILE and 0.75 or 1
 				unexpected_UI["PILL"].Position = UDim2.new(pillStartPos.X.Scale, pillStartPos.X.Offset + (delta.X / sf), pillStartPos.Y.Scale, pillStartPos.Y.Offset + (delta.Y / sf))
+				LASTFOCUSED = os.clock()  -- ADD THIS
 			end
 		end
 	end
@@ -1453,6 +1455,10 @@ MENU.MouseButton1Click:Connect(function()
 		local collapse = playTween(MENUFRAME, { Size = UDim2.new(0, 339, 0, 0) }, 0.25, Enum.EasingStyle.Quint)
 		collapse:Play()
 		collapse.Completed:Once(function() if not MENUON then MENUFRAME.Visible = false end end)
+		local curH = unexpected_UI.INFOFRAME.Size.Y.Offset
+		game:GetService("TweenService"):Create(unexpected_UI.INFOFRAME, TweenInfo.new(0.25, Enum.EasingStyle.Quint), { Size = UDim2.new(0, 0, 0, curH) }):Play()
+		task.delay(0.25, function() unexpected_UI.INFOFRAME.Visible = false end)
+		currentStoreItem = nil
 		SHS(HOVERED)
 	end
 end)
