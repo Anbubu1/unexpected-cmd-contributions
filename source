@@ -35,7 +35,7 @@ SETUPCHAR(LP.Character or LP.CharacterAdded:Wait())
 LP.CharacterAdded:Connect(SETUPCHAR)
 
 function isR15(plr)
-	return plr.Character:FindFirstChildOfClass("Humanoid").RigType == Enum.HumanoidRigType.R15
+	return HUM.RigType == Enum.HumanoidRigType.R15
 end
 
 local function parseBool(state, default)
@@ -2969,6 +2969,23 @@ unexpected:addcmd("importiy", "Import plugins, binds, and events from Infinite Y
     for _, pair in ipairs({{"autorun","autorun"},{"plugin","plugin"},{"bind","bind"},{"event","event"}}) do if MENUFRAMES[pair[1]].Visible then renderList(pair[2]) end end
     unexpected:notify("importiy", ("Imported: %d plugin(s), %d bind(s), %d event(s)."):format(imported.plugins, imported.binds, imported.events))
 end)
+
+unexpected:addcmd("rejoinonkick", "Automatically rejoin when kicked", function(state)
+	local enable = parseBool(state, true)
+	if enable then
+		if rjkickConn then return unexpected:notify("rejoinonkick", "Already active.") end
+		rjkickConn = LP.OnTeleport:Connect(function(teleportState, _, _)
+			if teleportState == Enum.TeleportState.RequestedFromServer then
+				task.wait(3)
+				TPS:Teleport(game.PlaceId, LP)
+			end
+		end)
+		unexpected:notify("rejoinonkick", "Rejoin on kick enabled.")
+	else
+		if rjkickConn then rjkickConn:Disconnect() rjkickConn = nil end
+		unexpected:notify("rejoinonkick", "Rejoin on kick disabled.")
+	end
+end, {"rjkick"}, {"true/false"})
 
 local function autorunItems_init()
 	local t = {}
