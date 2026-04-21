@@ -540,30 +540,35 @@ local function notifFadeOut()
 end
 
 local function notifQueue()
-	notifSeq = notifSeq + 1
-	local mySeq = notifSeq
-	if #notificationQueue == 0 then notifFadeOut() return end
+	notifSeq += 1
+	local seq = notifSeq
+	local q = notificationQueue
+	if #q == 0 then
+		notifFadeOut()
+		return
+	end
 	isNotif = true
-	local data = table.remove(notificationQueue, 1)
-	local total = #notificationQueue + 1
-	notiftitle.Text = string.format("%s (%d)", tostring(data.title), total)
-	notiftext.Text = tostring(data.text)
+	local data = table.remove(q, 1)
+	local total = #q + 1
+	notiftitle.Text = data.title .. " (" .. total .. ")"
+	notiftext.Text = data.text
 	loadingBar.Size = UDim2.new(0.82, 0, 0, 1)
 	notifUI.Visible = true
 	if total == 1 then
+		local query = notifUI:QueryDescendants("TextLabel,TextButton")
 		notifUI.BackgroundTransparency = 1
-		for _, v in ipairs(notifUI:GetDescendants()) do
-			if v:IsA("TextLabel") or v:IsA("TextButton") then v.TextTransparency = 1 end
-		end
-		playTween(notifUI, { BackgroundTransparency = 0, Position = notifPos }, 0.25):Play()
-		for _, v in ipairs(notifUI:GetDescendants()) do
-			if v:IsA("TextLabel") or v:IsA("TextButton") then playTween(v, { TextTransparency = 0 }, 0.25):Play() end
-		end
+		for i = 1, #query do query[i].TextTransparency = 1 end
+		playTween(notifUI, {BackgroundTransparency = 0,Position = notifPos}, 0.25):Play()
+		for i = 1, #query do playTween(query[i], { TextTransparency = 0 }, 0.25):Play() end
 	end
-	if activeBarTween then activeBarTween:Cancel() end
-	activeBarTween = playTween(loadingBar, { Size = UDim2.new(0, 0, 0, 1) }, 5, Enum.EasingStyle.Linear)
-	activeBarTween:Play()
-	task.delay(5, function() if mySeq == notifSeq then notifQueue() end end)
+	local t = activeBarTween
+	if t then t:Cancel() end
+	t = playTween(loadingBar,{ Size = UDim2.new(0, 0, 0, 1) },5,Enum.EasingStyle.Linear)
+	activeBarTween = t
+	t:Play()
+	task.delay(5, function()
+		if seq == notifSeq then notifQueue() end
+	end)
 end
 
 notifClose.MouseButton1Click:Connect(function()
@@ -585,14 +590,16 @@ notifClose.MouseButton1Click:Connect(function()
 end)
 
 function unexpected:notify(title, ...)
-	local text = table.concat({...}, " ") -- why the fuck did i make `local args = {...}`?
-	table.insert(notificationQueue, { title = tostring(title or "Notification"), text = text })
+	local text = table.concat({...}, " ")
+	local q = notificationQueue
+	q[#q + 1] = {title = title or "Notification",text = text}
 	if isNotif then
-		local currentTitle = string.match(notiftitle.Text, "^(.-) %(%d+%)$") or notiftitle.Text
-		notiftitle.Text = string.format("%s (%d)", currentTitle, #notificationQueue + 1)
-	else
-		notifQueue()
+		local s = notiftitle.Text
+		local base = s:match("^(.-) %(%d+%)$") or s
+		notiftitle.Text = base .. " (" .. (#q + 1) .. ")"
+		return
 	end
+	notifQueue()
 end
 
 unexpected_UI["CLI"]:GetPropertyChangedSignal("Text"):Connect(function()
