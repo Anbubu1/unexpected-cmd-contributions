@@ -481,7 +481,7 @@ function Unexpected:AddCommand(
 	local ActualName = Name:gsub("^%[.-%]%s*", "")
 
     local LowerAliases: {string} = {}
-    local LowerOriginal = ActualName:lower()
+    local LowerOriginal = string.lower(ActualName)
 
 	local entry: Command = {
 		Original = ActualName, Description = Description, Aliases = _Aliases,
@@ -496,7 +496,7 @@ function Unexpected:AddCommand(
 	}
 
 	for _, Alias in next, _Aliases do
-		LowerAliases[#LowerAliases + 1] = Alias:lower()
+		LowerAliases[#LowerAliases + 1] = string.lower(Alias)
 	end
 
 	CommandListData[LowerOriginal] = entry
@@ -509,7 +509,8 @@ function Unexpected:AddCommand(
 
 	local HasBool = false
 	for _, Argument in next, _UsageArgs do
-		if Argument:lower():find("true") or Argument:lower():find("false") then
+        local Lowered = string.lower(Argument)
+		if Lowered:find("true") or Lowered:find("false") then
             HasBool = true
             break
         end
@@ -762,6 +763,8 @@ do
                 local bestKey = Matches[1]
                 Predictor.Text = if string.lower(bestKey) == LowerCommand then ""
                     else `{Input}{string.sub(bestKey, #BareCommand + 1)}`
+            else
+                Predictor.Text = ""
             end
             return
         end
