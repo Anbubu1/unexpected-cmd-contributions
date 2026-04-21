@@ -656,7 +656,10 @@ local function notifQueue()
 end
 
 notifClose.MouseButton1Click:Connect(function()
-	if activeBarTween then activeBarTween:Cancel() activeBarTween = nil end
+	if activeBarTween then
+        activeBarTween:Cancel()
+        activeBarTween = nil
+    end
 	notifSeq = notifSeq + 1
 	if #notificationQueue > 0 then
 		local data = table.remove(notificationQueue, 1)
@@ -707,7 +710,10 @@ unexpected_UI["CLI"]:GetPropertyChangedSignal("Text"):Connect(function()
 		if cmd and cmd.UsageArgs and #cmd.UsageArgs > 0 then
 			local hasPlayerArg = false
 			for _, arg in ipairs(cmd.UsageArgs) do
-				if arg:lower() == "player" or arg:lower() == "plr" then hasPlayerArg = true break end
+				if arg:lower() == "player" or arg:lower() == "plr" then
+                    hasPlayerArg = true
+                    break
+                end
 			end
 			if hasPlayerArg then
 				local function caseSens(pattern, word)
@@ -814,13 +820,15 @@ local function updateList(filter)
 		if not cmdA or not cmdB then return a.Text < b.Text end
 		local posA = cmdA._lowerOriginal:find(filter, 1, true) or (function()
 			for _, alias in ipairs(cmdA._lowerAliases) do
-				local p = alias:find(filter, 1, true) if p then return p end
+				local p = alias:find(filter, 1, true)
+                if p then return p end
 			end
 			return math.huge
 		end)()
 		local posB = cmdB._lowerOriginal:find(filter, 1, true) or (function()
 			for _, alias in ipairs(cmdB._lowerAliases) do
-				local p = alias:find(filter, 1, true) if p then return p end
+				local p = alias:find(filter, 1, true)
+                if p then return p end
 			end
 			return math.huge
 		end)()
@@ -1059,16 +1067,21 @@ local COLOR_KEYS = {
 }
 
 local function applyColors()
-	local bg, stroke, textMain, textDim, accent = UiQuery.COLORS.BACKGROUND, UiQuery.COLORS.STROKE, UiQuery.COLORS.TEXT_MAIN, UiQuery.COLORS.TEXT_DIM, UiQuery.COLORS.ACCENT
+	local background, stroke, textMain, textDim, accent =
+        UiQuery.COLORS.BACKGROUND,
+        UiQuery.COLORS.STROKE,
+        UiQuery.COLORS.TEXT_MAIN,
+        UiQuery.COLORS.TEXT_DIM,
+        UiQuery.COLORS.ACCENT
 	if _sharedTooltip then
-		_sharedTooltip.BackgroundColor3 = bg
+		_sharedTooltip.BackgroundColor3 = background
 		_sharedTooltip.TextColor3 = textMain
 		for _, s in ipairs(_sharedTooltip:GetChildren()) do
 			if s:IsA("UIStroke") then s.Color = stroke end
 		end
 	end
 	if indicator then
-		indicator.BackgroundColor3 = bg
+		indicator.BackgroundColor3 = background
 		for _, s in ipairs(indicator:GetChildren()) do
 			if s:IsA("UIStroke") then s.Color = stroke end
 		end
@@ -1077,16 +1090,16 @@ local function applyColors()
 		if obj:IsA("UIStroke") then obj.Color = stroke
 		elseif obj:IsA("ScrollingFrame") then obj.ScrollBarImageColor3 = accent
 		elseif obj:IsA("TextButton") then
-			obj.BackgroundColor3 = obj:GetAttribute("colorKey") and UiQuery.COLORS[obj:GetAttribute("colorKey")] or bg
+			obj.BackgroundColor3 = obj:GetAttribute("colorKey") and UiQuery.COLORS[obj:GetAttribute("colorKey")] or background
 			obj.TextColor3 = textMain
 		elseif obj:IsA("TextLabel") then obj.TextColor3 = textMain
 		elseif obj:IsA("TextBox") then
 			obj.TextColor3 = textMain
 			obj.PlaceholderColor3 = textDim
-			if obj.BackgroundTransparency ~= 1 then obj.BackgroundColor3 = bg end
+			if obj.BackgroundTransparency ~= 1 then obj.BackgroundColor3 = background end
 		elseif obj:IsA("ImageButton") or obj:IsA("ImageLabel") then obj.ImageColor3 = accent
 		elseif obj:IsA("Frame") and obj.BackgroundTransparency ~= 1 and obj.Name ~= "Bar" then
-			obj.BackgroundColor3 = bg
+			obj.BackgroundColor3 = background
 		end
 	end
 	unexpected_UI.PREDICTOR.TextColor3 = textDim
@@ -1101,8 +1114,8 @@ local function updateIndicatorS(newSize)
 end
 
 local function updateUICorners(newSize)
-	UICornersS = math.clamp(tonumber(newSize) or 1, 0, 1) -- idk why the old code had 2
-	for _, data in ipairs(UiCornerTable) do
+	local UICornersS = math.clamp(tonumber(newSize) or 1, 0, 1)
+	for _, data in next, UiCornerTable do
 		data.corner.CornerRadius = UDim.new(data.scale * UICornersS, data.offset)
 	end
 	UX_config()
@@ -1115,7 +1128,8 @@ local function rgbRows()
 	local resetRow = make("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
 	make("TextLabel", resetRow, { Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1, Text = "reset positions", TextColor3 = UiQuery.COLORS.TEXT_MAIN, TextSize = 16, FontFace = UiQuery.FONTS.REGULAR, TextXAlignment = Enum.TextXAlignment.Left, BorderSizePixel = 0 })
 	local resetBtn = make("TextButton", resetRow, { Size = UDim2.new(0,120,0,30), Position = UDim2.new(1,-120,0.5,-15), BackgroundColor3 = UiQuery.COLORS.BACKGROUND, TextColor3 = UiQuery.COLORS.TEXT_MAIN, FontFace = UiQuery.FONTS.REGULAR, TextSize = 14, BorderSizePixel = 0, Text = "reset" })
-	CreateCorner(resetBtn, 0.1, 0) CreateStroke(resetBtn, UiQuery.COLORS.STROKE)
+	CreateCorner(resetBtn, 0.1, 0)
+    CreateStroke(resetBtn, UiQuery.COLORS.STROKE)
 	resetBtn.MouseButton1Click:Connect(function()
 		CONFIG.pillPos = nil
 		CONFIG.indicatorPos = nil
@@ -1127,12 +1141,17 @@ local function rgbRows()
 	local sizeRow = make("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
 	make("TextLabel", sizeRow, { Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1, Text = "indicator size", TextColor3 = UiQuery.COLORS.TEXT_MAIN, TextSize = 16, FontFace = UiQuery.FONTS.REGULAR, TextXAlignment = Enum.TextXAlignment.Left, BorderSizePixel = 0 })
 	local sizeBox = make("TextBox", sizeRow, { Size = UDim2.new(0,120,0,30), Position = UDim2.new(1,-120,0.5,-15), BackgroundColor3 = UiQuery.COLORS.BACKGROUND, TextColor3 = UiQuery.COLORS.TEXT_MAIN, PlaceholderColor3 = UiQuery.COLORS.TEXT_DIM, PlaceholderText = "size", Text = tostring(indicatorS), TextSize = 14, FontFace = UiQuery.FONTS.REGULAR, BorderSizePixel = 0, ClearTextOnFocus = false })
-	CreateCorner(sizeBox, 0.1, 0) CreateStroke(sizeBox, UiQuery.COLORS.STROKE)
-	sizeBox.FocusLost:Connect(function() updateIndicatorS(sizeBox.Text) sizeBox.Text = tostring(indicatorS) end)
+	CreateCorner(sizeBox, 0.1, 0)
+    CreateStroke(sizeBox, UiQuery.COLORS.STROKE)
+	sizeBox.FocusLost:Connect(function()
+        updateIndicatorS(sizeBox.Text)
+        sizeBox.Text = tostring(indicatorS)
+    end)
 	local cornerRow = make("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
 	make("TextLabel", cornerRow, { Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1, Text = "uicorners scale", TextColor3 = UiQuery.COLORS.TEXT_MAIN, TextSize = 16, FontFace = UiQuery.FONTS.REGULAR, TextXAlignment = Enum.TextXAlignment.Left, BorderSizePixel = 0 })
 	local cornerBox = make("TextBox", cornerRow, { Size = UDim2.new(0,120,0,30), Position = UDim2.new(1,-120,0.5,-15), BackgroundColor3 = UiQuery.COLORS.BACKGROUND, TextColor3 = UiQuery.COLORS.TEXT_MAIN, PlaceholderColor3 = UiQuery.COLORS.TEXT_DIM, PlaceholderText = "scale", Text = tostring(CONFIG.UICornerScale or 1), TextSize = 14, FontFace = UiQuery.FONTS.REGULAR, BorderSizePixel = 0, ClearTextOnFocus = false })
-	CreateCorner(cornerBox, 0.1, 0) CreateStroke(cornerBox, UiQuery.COLORS.STROKE)
+	CreateCorner(cornerBox, 0.1, 0)
+    CreateStroke(cornerBox, UiQuery.COLORS.STROKE)
 	cornerBox.FocusLost:Connect(function()
 		local scale = math.clamp(tonumber(cornerBox.Text) or 1, 0, 1) -- again, old code had 2 for some reason
 		CONFIG.UICornerScale = scale
@@ -1144,13 +1163,16 @@ local function rgbRows()
 		local row = make("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,40), BackgroundTransparency = 1, BorderSizePixel = 0 })
 		make("TextLabel", row, { Size = UDim2.new(0,140,1,0), BackgroundTransparency = 1, Text = def.label, TextColor3 = UiQuery.COLORS.TEXT_MAIN, TextSize = 16, FontFace = UiQuery.FONTS.REGULAR, TextXAlignment = Enum.TextXAlignment.Left, BorderSizePixel = 0 })
 		local preview = make("TextButton", row, { Size = UDim2.new(0,120,0,30), Position = UDim2.new(1,-120,0.5,-15), BackgroundColor3 = UiQuery.COLORS[def.key], Text = "", BorderSizePixel = 0 })
-		CreateCorner(preview, 0.15, 0) CreateStroke(preview, UiQuery.COLORS.STROKE)
+		CreateCorner(preview, 0.15, 0)
+        CreateStroke(preview, UiQuery.COLORS.STROKE)
 		preview:SetAttribute("colorKey", def.key)
 		local inputRow = make("Frame", unexpected_UI.STSCROLL, { Size = UDim2.new(0,278,0,0), BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = true })
 		local expanded = false
 		local function mkCR(label, x)
 			local b = make("TextBox", inputRow, { Size = UDim2.new(0,78,0,30), Position = UDim2.new(0,x,0,4), BackgroundColor3 = UiQuery.COLORS.BACKGROUND, TextColor3 = UiQuery.COLORS.TEXT_MAIN, PlaceholderColor3 = UiQuery.COLORS.TEXT_DIM, PlaceholderText = label, Text = "", TextSize = 14, FontFace = UiQuery.FONTS.REGULAR, BorderSizePixel = 0, ClearTextOnFocus = false })
-			CreateCorner(b, 0.1, 0) CreateStroke(b, UiQuery.COLORS.STROKE) return b
+			CreateCorner(b, 0.1, 0)
+            CreateStroke(b, UiQuery.COLORS.STROKE)
+            return b
 		end
 		local rBox = mkCR("R", 5)
 		local gBox = mkCR("G", 98)
@@ -1184,6 +1206,7 @@ local function showcmdList()
 	local used = {}
 	local BTNLIST = unexpected_UI.BTNLIST
 	local CMDEXAMPLE = unexpected_UI.CMDEXAMPLE
+    local _localGuiInset
 	if not _sharedTooltip then
 		_sharedTooltip = make("TextLabel", unexpected_UI.UI, {
 			BackgroundColor3 = UiQuery.COLORS.BACKGROUND, Visible = false,
@@ -1299,8 +1322,6 @@ local function dWPVisual(name)
 	end
 end
 
-local ACTIVETAB
-
 local function stACTIVETAB(tabKey, onOpen)
 	local frame = MENUFRAMES[tabKey]
 	if not frame then return end
@@ -1330,7 +1351,6 @@ local function stACTIVETAB(tabKey, onOpen)
 
 	currentStoreItem = nil
 	local function open()
-		ACTIVETAB = tabKey
 		if onOpen then
 			local ok, err = pcall(onOpen)
 			if not ok then warn("onOpen error:", err) end
@@ -1338,7 +1358,11 @@ local function stACTIVETAB(tabKey, onOpen)
 		fadeIn(frame)
 	end
 
-	if MENUON then open() return end
+	if MENUON then
+        open()
+        return
+    end
+
 	MENUON = true
 	MENUFRAME.Visible = true
 	playTween(unexpected_UI.PILL, {Size = UDim2.new(0,339,0,71)}, 0.25, Enum.EasingStyle.Quint):Play()
@@ -1350,7 +1374,6 @@ local function stACTIVETAB(tabKey, onOpen)
 end
 
 local function returnToMenu()
-	ACTIVETAB = nil
 	unexpected_UI.LABEL.Text = "menu"
 	for _, b in ipairs(MENUS) do b.Visible = true end
 	for _, f in ipairs(MENUFRAMES) do f.Visible = false end
@@ -1550,7 +1573,10 @@ end)
 local oneMenu = false
 local function showPILL(yn)
 	HIDING = false
-	if shrinkTween then shrinkTween:Cancel() shrinkTween = nil end
+	if shrinkTween then
+        shrinkTween:Cancel()
+        shrinkTween = nil
+    end
 	unexpected_UI["PILL"].Visible = true
 	unexpected_UI["PILL"].Size = UDim2.new(0, 218, 0, 71)
 	HIDDEN = false
@@ -1574,7 +1600,10 @@ local function showPILL(yn)
 end
 
 indicator.MouseButton1Click:Connect(function()
-	if indicatorWDRAG then indicatorWDRAG = false return end
+	if indicatorWDRAG then
+        indicatorWDRAG = false
+        return
+    end
 	showPILL()
 	for name, f in pairs(MENUFRAMES) do f.Visible = false end
 	returnToMenu()
@@ -1676,7 +1705,12 @@ local function hookEvents()
 	end
 	local EVENT_MAP = {
 		died = function(ev) return Humanoid.Died:Connect(function() runCmd(ev.cmd) end) end,
-		respawned = function(ev) return LocalPlayer.CharacterAdded:Connect(function() task.wait(0.5) runCmd(ev.cmd) end) end,
+		respawned = function(ev)
+            return LocalPlayer.CharacterAdded:Connect(function()
+                task.wait(0.5)
+                runCmd(ev.cmd)
+            end)
+        end,
 		jumped = function(ev) return Humanoid.Jumping:Connect(function(a) if a then runCmd(ev.cmd) end end) end,
 		seated = function(ev) return Humanoid.Seated:Connect(function(a) if a then runCmd(ev.cmd) end end) end,
 		healthchanged = function(ev) return Humanoid.HealthChanged:Connect(function() runCmd(ev.cmd) end) end,
@@ -1853,8 +1887,10 @@ end
 
 local function migrateBinds()
 	CONFIG.Binds = CONFIG.Binds or {}
-	for i, bd in ipairs(CONFIG.Binds) do
-		if not bd.id then bd.id = mkBINDID() bd.isPlugin = bd.isPlugin or false end
+	for i, bd in next, CONFIG.Binds do
+        if bd.id then continue end
+        bd.id = mkBINDID()
+        bd.isPlugin = bd.isPlugin or false
 	end
 	UX_config()
 end
@@ -1887,7 +1923,8 @@ local function mkPLUGINENV()
 		else
 			for _, p in ipairs(Players:GetPlayers()) do
 				if p.Name:lower():sub(1, #arg) == arg or p.DisplayName:lower():sub(1, #arg) == arg then
-					results[#results+1] = p.Name break
+					results[#results+1] = p.Name
+                    break
 				end
 			end
 		end
@@ -1965,8 +2002,7 @@ local function mkPLUGINENV()
 		cloneref = cloneref,
 		sethiddenproperty = typeof(sethiddenproperty) == "function" and sethiddenproperty or nil,
 		setfflag = typeof(setfflag) == "function" and setfflag or nil,
-		Players = Players, Player = LocalPlayer, Character = Character, Humanoid = Humanoid,
-		RootPart = RootPart, Camera = Camera, unexpected = unexpected,
+		unexpected = unexpected,
 	}, _args
 end
 
@@ -2074,7 +2110,10 @@ end)
 
 local function addPlugin(args)
 	local NAME = args.name or args[1]
-	if not NAME or NAME == "" then return unexpected:notify("unexpected", "Usage: plugin [name]") end
+	if not NAME or NAME == "" then
+        unexpected:notify("unexpected", "Usage: plugin [name]")
+        return
+    end
 	if LOAD_PLUGIN(NAME) then
 		CONFIG.Plugins[NAME] = true
 		UX_config()
@@ -2103,7 +2142,10 @@ end
 
 local function removePlugin(args)
 	local NAME = args.name or args[1]
-	if not NAME or NAME == "" then return unexpected:notify("unexpected", "Usage: unplugin [name]") end
+	if not NAME or NAME == "" then
+        unexpected:notify("unexpected", "Usage: unplugin [name]")
+        return
+    end
 	if CONFIG.Plugins[NAME] then
 		CONFIG.Plugins[NAME] = nil
 		stripPluginCmds(NAME)
@@ -2151,8 +2193,11 @@ local function AnimationToTrack(asset_id)
 end
 
 unexpected:addcmd("autorun", "Add a command to autorun on load", function(...)
-	local args = {...}
-	if #args == 0 then return unexpected:notify("autorun", "Usage: autorun [command] [args]") end
+	local args = table.pack(...)
+	if #args == 0 then
+        unexpected:notify("autorun", "Usage: autorun [command] [args]")
+        return
+    end
 	local full = table.concat(args, " ")
 	CONFIG.Autoruns = CONFIG.Autoruns or {}
 	table.insert(CONFIG.Autoruns, full)
@@ -2162,17 +2207,20 @@ unexpected:addcmd("autorun", "Add a command to autorun on load", function(...)
 end, nil, {"command", "..."})
 
 unexpected:addcmd("unautorun", "Remove an autorun command", function(...)
-	local args = {...}
-	if #args == 0 then return unexpected:notify("autorun", "Usage: unautorun [command] [args]") end
+	local args = table.pack(...)
+	if args.n == 0 then
+        unexpected:notify("autorun", "Usage: unautorun [command] [args]")
+        return
+    end
 	local full = table.concat(args, " ")
 	CONFIG.Autoruns = CONFIG.Autoruns or {}
 	for i = #CONFIG.Autoruns, 1, -1 do
-		if CONFIG.Autoruns[i] == full then
-			table.remove(CONFIG.Autoruns, i)
-			UX_config()
-			if MENUFRAMES.autorun.Visible then renderList("autorun") end
-			return unexpected:notify("autorun", "Removed: " .. full)
-		end
+        if CONFIG.Autoruns[i] ~= full then continue end
+        table.remove(CONFIG.Autoruns, i)
+        UX_config()
+        if MENUFRAMES.autorun.Visible then renderList("autorun") end
+        unexpected:notify("autorun", "Removed: " .. full)
+        return
 	end
 	unexpected:notify("autorun", "Not found: " .. full)
 end, nil, {"command", "..."})
@@ -2186,76 +2234,121 @@ end)
 
 unexpected:addcmd("plugin", "Add a plugin", function(NAME) 
 	addPlugin({name = NAME})
-	if MENUFRAMES.plugin.Visible then renderList("plugin") end
+	if MENUFRAMES.plugin.Visible then
+        renderList("plugin")
+    end
 end, nil, {"name"})
 
 unexpected:addcmd("unplugin", "Disable a plugin", function(NAME) 
 	removePlugin({name = NAME}) 
-	if MENUFRAMES.plugin.Visible then renderList("plugin") end
+	if MENUFRAMES.plugin.Visible then
+        renderList("plugin")
+    end
 end, nil, {"name"})
 
 unexpected:addcmd("reloadplugin", "Reload a plugin", function(NAME)
 	removePlugin({name = NAME})
 	task.wait(1)
 	addPlugin({name = NAME})
-	if MENUFRAMES.plugin.Visible then renderList("plugin") end
+	if MENUFRAMES.plugin.Visible then
+        renderList("plugin")
+    end
 end, nil, {"name"})
 
 unexpected:addcmd("clearplugins", "Disable all plugins", function()
-	CONFIG.Plugins = {}
+	for pluginName in next, CONFIG.Plugins do
+		stripPluginCmds(pluginName)
+	end
+
+	table.clear(CONFIG.Plugins)
 	UX_config()
-	if MENUFRAMES.plugin.Visible then renderList("plugin") end
+
+	if MENUFRAMES.plugin.Visible then
+        renderList("plugin")
+    end
+
+	if MENUFRAMES.command.Visible then
+		clearcmdList()
+		showcmdList()
+	end
+
 	unexpected:notify("plugins", "All plugins disabled.")
 end)
 
 unexpected:addcmd("addallplugins", "Load all available plugins", function()
 	local files = listfiles(PLUGIN_DIR)
-	local loaded = 0
-
-	for _, file in ipairs(files) do
+	local toLoad = {}
+	for _, file in next, files do
 		local filename = file:match("([^/\\]+)$")
+		if not (filename:match("%.ux$") or filename:match("%.iy$")) then
+            continue
+        end
 
-		if filename:match("%.ux$") or filename:match("%.iy$") then
-			local pluginName = filename:match("^(.+)%.[^.]+$")
-			if LOAD_PLUGIN(pluginName) then
-				CONFIG.Plugins[pluginName] = true
-				loaded += 1
-			end
-		end
+        local pluginName = filename:match("^(.+)%.[^.]+$")
+        if not CONFIG.Plugins[pluginName] then
+            toLoad[#toLoad + 1] = pluginName
+        end
 	end
 
-	UX_config()
-	unexpected:notify("plugins", "Loaded " .. loaded .. " plugin(s).")
+    local f = function(pluginName)
+        if not LOAD_PLUGIN(pluginName) then return end
+        CONFIG.Plugins[pluginName] = true
+        UX_config()
+    end
 
-	if MENUFRAMES.plugin.Visible then renderList("plugin") end
+	for _, pluginName in next, toLoad do
+		task.spawn(f, pluginName)
+	end
+
+	task.delay(0.5, function()
+		if MENUFRAMES.plugin.Visible then renderList("plugin") end
+		unexpected:notify("plugins", `Loaded {#toLoad} plugin(s).`)
+	end)
 end)
 
 unexpected:addcmd("bind", "Bind a key to run a command", function(key, ...)
 	if not key or key == "" then
-		return unexpected:notify("bind", "Usage: bind [key] [command] [args] [toggle]")
+		unexpected:notify("bind", "Usage: bind [key] [command] [args] [toggle]")
+        return
 	end
-	local args = {...}
-	if #args == 0 then return unexpected:notify("bind", "No command specified.") end
+	local args = table.pack(...)
+    local len = args.n
+	if len == 0 then
+        unexpected:notify("bind", "No command specified.")
+        return
+    end
+    
+    local lastArg = args[len]
 	local toggle = false
-	if args[#args] == "true" or args[#args] == "toggle=true" then
+	if lastArg == "true" or lastArg == "toggle=true" then
 		toggle = true
-		table.remove(args, #args)
-	elseif args[#args] == "false" or args[#args] == "toggle=false" then
-		table.remove(args, #args)
+		args[len] = nil
+	elseif lastArg == "false" or lastArg == "toggle=false" then
+		args[len] = nil
 	end
 
 	local cmdString = table.concat(args, " ")
 	UX_addbind(key, cmdString, toggle)
-	CONFIG.Binds = CONFIG.Binds or {}
+    local Binds = CONFIG.Binds or {}
+	CONFIG.Binds = Binds
 	local bindId = mkBINDID()
-	table.insert(CONFIG.Binds, {id = bindId,key = key:lower(),cmd = cmdString,toggle = toggle,isPlugin = false})
+    Binds[#Binds + 1] = {
+        id = bindId,
+        key = key:lower(),
+        cmd = cmdString,
+        toggle = toggle,
+        isPlugin = false
+    }
 	UX_config()
-	unexpected:notify("bind", "[" .. key .. "] → " .. cmdString)
+	unexpected:notify("bind", `[{key}] → {cmdString}`)
 	if MENUFRAMES.bind.Visible then renderList("bind") end
 end, nil, {"key", "command", "...", "toggle"})
 
 unexpected:addcmd("unbind", "Remove all key bindings", function(key)
-	if not key or key == "" then return unexpected:notify("unbind", "Usage: unbind [key]") end
+	if not key or key == "" then
+        unexpected:notify("unbind", "Usage: unbind [key]")
+        return
+    end
 	UX_unbind(key)
 	CONFIG.Binds = CONFIG.Binds or {}
 	for i = #CONFIG.Binds, 1, -1 do
@@ -2276,9 +2369,15 @@ unexpected:addcmd("binds", "Show binds tab", function()
 end)
 
 unexpected:addcmd("onevent", "Add event trigger", function(event, ...)
-	if not event then return unexpected:notify("events", "Usage: onevent [event] [filter/*] [command]") end
+	if not event then
+        unexpected:notify("events", "Usage: onevent [event] [filter/*] [command]")
+        return
+    end
 	local args = {...}
-	if #args == 0 then return unexpected:notify("events", "Missing command.") end
+	if #args == 0 then
+        unexpected:notify("events", "Missing command.")
+        return
+    end
 	local FILTER_EVENTS = {playerjoined=true, playerleft=true, chatted=true, statechanged=true, keypressed=true, keyreleased=true, touched=true, equipped=true, unequipped=true}
 	local filter, cmd
 	if FILTER_EVENTS[event:lower()] and #args >= 2 then
@@ -2293,11 +2392,14 @@ unexpected:addcmd("onevent", "Add event trigger", function(event, ...)
 	UX_config()
 	hookEvents()
 	if MENUFRAMES.event.Visible then renderList("event") end
-	unexpected:notify("events", "Added: " .. event .. (filter and (" [" .. filter .. "]") or "") .. " → " .. cmd)
+	unexpected:notify("events", `Added: {event}{filter and ` [{filter}]` or ""} → {cmd}`)
 end, nil, {"event", "filter/*", "..."})
 
 unexpected:addcmd("unevent", "Remove event trigger", function(event, ...)
-	if not event then return unexpected:notify("events", "Usage: unevent [event] [cmd]") end
+	if not event then
+        unexpected:notify("events", "Usage: unevent [event] [cmd]")
+        return
+    end
 	local args = {...}
 	local cmd = #args > 0 and table.concat(args, " ") or nil
 	CONFIG.Events = CONFIG.Events or {}
@@ -2316,9 +2418,9 @@ unexpected:addcmd("unevent", "Remove event trigger", function(event, ...)
 	hookEvents()
 	if MENUFRAMES.event.Visible then renderList("event") end
 	if removed > 0 then
-		unexpected:notify("events", "Removed " .. removed .. ": " .. event .. (cmd and (" → " .. cmd) or ""))
+		unexpected:notify("events", `Removed {removed}: {event}{cmd and ` → {cmd}` or ""}`)
 	else
-		unexpected:notify("events", "No match found for: " .. event .. (cmd and (" → " .. cmd) or ""))
+		unexpected:notify("events", `No match found for: {event}{cmd and ` → {cmd}` or ""}`)
 	end
 end, nil, {"event", "[cmd]"})
 
@@ -2385,11 +2487,17 @@ unexpected:addcmd("goto", "Teleport to a player", function(name)
 	name = name:lower()
 	local target
 	if name == "random" then
-		local t = {} for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer then t[#t+1] = p end end
+		local t = {}
+        for _, p in next, Players:GetPlayers() do
+            if p ~= LocalPlayer then t[#t+1] = p end
+        end
 		target = #t > 0 and t[math.random(#t)] or nil
 	else
-		for _, p in ipairs(Players:GetPlayers()) do
-			if p.Name:lower() == name or p.DisplayName:lower() == name then target = p break end
+		for _, p in next, Players:GetPlayers() do
+			if p.Name:lower() == name or p.DisplayName:lower() == name then
+                target = p
+                break
+            end
 		end
 	end
 	local root = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
@@ -2400,11 +2508,17 @@ unexpected:addcmd("walktoplayer", "Walk to a player", function(name)
 	name = name:lower()
 	local target
 	if name == "random" then
-		local t = {} for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer then t[#t+1] = p end end
+		local t = {}
+        for _, p in next, Players:GetPlayers() do
+            if p ~= LocalPlayer then t[#t+1] = p end
+        end
 		target = #t > 0 and t[math.random(#t)] or nil
 	else
-		for _, p in ipairs(Players:GetPlayers()) do
-			if p.Name:lower() == name or p.DisplayName:lower() == name then target = p break end
+		for _, p in next, Players:GetPlayers() do
+			if p.Name:lower() == name or p.DisplayName:lower() == name then
+                target = p
+                break
+            end
 		end
 	end
 	local root = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
@@ -2415,27 +2529,39 @@ end, nil, {"player"})
 
 local tweenSpeed = 1
 unexpected:addcmd("tweengoto", "Smoothly tween to a player", function(name)
-	if not name or name == "" then return unexpected:notify("tweengoto", "Usage: tweengoto [player]") end
+	if not name or name == "" then
+        unexpected:notify("tweengoto", "Usage: tweengoto [player]")
+        return
+    end
 	name = name:lower()
 	local target
 	if name == "random" then
 		local list = {}
-		for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer then list[#list+1] = p end end
+		for _, p in next, Players:GetPlayers() do if p ~= LocalPlayer then list[#list+1] = p end end
 		target = #list > 0 and list[math.random(#list)] or nil
 	else
-		for _, p in ipairs(Players:GetPlayers()) do
-			if p.Name:lower() == name or p.DisplayName:lower() == name then target = p break end
+		for _, p in next, Players:GetPlayers() do
+			if p.Name:lower() == name or p.DisplayName:lower() == name then
+                target = p
+                break
+            end
 		end
 	end
 	local root = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
-	if not root then return unexpected:notify("tweengoto", "Player not found") end
+	if not root then
+        unexpected:notify("tweengoto", "Player not found")
+        return
+    end
 	TweenService:Create(RootPart, TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear), {CFrame = root.CFrame + Vector3.new(0, 3, 0)}):Play() -- idk why my old code had 2 lines of this
 	unexpected:notify("tweengoto", "Tweening to " .. target.Name)
 end, {"tgoto"}, {"player"})
 
 unexpected:addcmd("tweenspeed", "Set tween speed", function(speed)
 	speed = tonumber(speed)
-	if not speed or speed <= 0 then return unexpected:notify("tweenspeed", "Usage: tweenspeed [number]") end
+	if not speed or speed <= 0 then
+        unexpected:notify("tweenspeed", "Usage: tweenspeed [number]")
+        return
+    end
 	tweenSpeed = speed
 	unexpected:notify("tweenspeed", "Tween speed set to " .. speed)
 end, {"tspeed"}, {"speed"})
@@ -2444,17 +2570,23 @@ local noclip
 unexpected:addcmd("noclip", "Toggle walk through walls (true/false)", function(state)
 	local enable = ParseBool(state, true)
 	if enable then
-		if noclip then return unexpected:notify("noclip", "Already noclipping.") end
+		if noclip then
+            unexpected:notify("noclip", "Already noclipping.")
+            return
+        end
 		noclip = RunService.Stepped:Connect(function()
-			for _, p in ipairs(Character:GetDescendants()) do
-				if typeof(p) == "Instance" and p:IsA("BasePart") then p.CanCollide = false end
-			end
+            for _, p in next, Character:QueryDescendants("BasePart") do
+                p.CanCollide = false
+            end
 		end)
 		unexpected:notify("noclip", "Noclip enabled")
 	else
-		if noclip then noclip:Disconnect() noclip = nil end
-		for _, p in ipairs(Character:GetDescendants()) do
-			if typeof(p) == "Instance" and p:IsA("BasePart") then p.CanCollide = true end
+		if noclip then
+            noclip:Disconnect()
+            noclip = nil
+        end
+		for _, p in next, Character:QueryDescendants("BasePart") do
+			p.CanCollide = true
 		end
 		unexpected:notify("noclip", "Noclip disabled")
 	end
@@ -2463,7 +2595,9 @@ end, nil, {"true/false"})
 local function coordsfix(a, b, c)
 	if a and not b and not c then
 		local nums = {}
-		for v in tostring(a):gmatch("[-%d%.]+") do nums[#nums + 1] = tonumber(v) end
+		for v in tostring(a):gmatch("[%-%d%.]+") do
+            nums[#nums + 1] = tonumber(v)
+        end
 		return nums[1], nums[2], nums[3]
 	end
 	return tonumber(a), tonumber(b), tonumber(c)
@@ -2471,20 +2605,29 @@ end
 
 unexpected:addcmd("tweentp", "Tween to coordinates", function(x, y, z)
 	x, y, z = coordsfix(x, y, z)
-	if not x or not y or not z then return unexpected:notify("tweentp", "Usage: tween [x] [y] [z]") end
+	if not x or not y or not z then
+        unexpected:notify("tweentp", "Usage: tween [x] [y] [z]")
+        return
+    end
 	TweenService:Create(RootPart, TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(x, y, z)}):Play()
 	unexpected:notify("tweentp", "Tweening to position")
 end, {"tween"}, {"x", "y", "z"})
 
 unexpected:addcmd("teleport", "Teleport to coordinates", function(x, y, z)
 	x, y, z = coordsfix(x, y, z)
-	if not x or not y or not z then return unexpected:notify("teleport", "Usage: teleport [x] [y] [z]") end
+	if not x or not y or not z then
+        unexpected:notify("teleport", "Usage: teleport [x] [y] [z]")
+        return
+    end
 	RootPart.CFrame = CFrame.new(x, y, z)
 end, {"tp"}, {"x", "y", "z"})
 
 unexpected:addcmd("walktopos", "Walk to position", function(x, y, z)
 	x, y, z = coordsfix(x, y, z)
-	if not x or not y or not z then return unexpected:notify("walktopos", "Usage: walktopos [x] [y] [z]") end
+	if not x or not y or not z then
+        unexpected:notify("walktopos", "Usage: walktopos [x] [y] [z]")
+        return
+    end
 	if Humanoid then Humanoid:MoveTo(Vector3.new(x, y, z)) end -- nesting
 end, {"wt"}, {"x", "y", "z"})
 
@@ -2497,7 +2640,10 @@ end)
 oldFOV = nil
 unexpected:addcmd("fov", "Set camera field of view", function(value)
 	value = tonumber(value)
-	if not value then return unexpected:notify("fov", "Usage: fov [number]") end
+	if not value then
+        unexpected:notify("fov", "Usage: fov [number]")
+        return
+    end
 	oldFOV = Camera.FieldOfView
 	Camera.FieldOfView = math.clamp(value, 1, 120)
 	unexpected:notify("fov", "FOV set to " .. Camera.FieldOfView)
@@ -2548,7 +2694,10 @@ unexpected:addcmd("shutdown", "Shutdown the game", function()
 end)
 
 unexpected:addcmd("setwaypoint", "Save a waypoint at current position", function(name)
-	if not name or name == "" then return unexpected:notify("setwaypoint", "Usage: setwaypoint [name]") end
+	if not name or name == "" then
+        unexpected:notify("setwaypoint", "Usage: setwaypoint [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
 	local pos = RootPart.Position
 	for i, wp in ipairs(CONFIG.Waypoints) do
@@ -2566,37 +2715,51 @@ unexpected:addcmd("setwaypoint", "Save a waypoint at current position", function
 end, {"swp", "setwp"}, {"name"})
 
 unexpected:addcmd("teleportwaypoint", "Teleport to a waypoint", function(name)
-	if not name or name == "" then return unexpected:notify("teleportwaypoint", "Usage: teleportwaypoint [name]") end
+	if not name or name == "" then
+        unexpected:notify("teleportwaypoint", "Usage: teleportwaypoint [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
-	for _, wp in ipairs(CONFIG.Waypoints) do
-		if wp.game == game.PlaceId and wp.name:lower() == name:lower() then
-			RootPart.CFrame = CFrame.new(wp.pos[1], wp.pos[2], wp.pos[3])
-			unexpected:notify("teleportwaypoint", "Teleported to " .. name)
-			return
-		end
+	for _, wp in next, CONFIG.Waypoints do
+        if wp.game ~= game.PlaceId or wp.name:lower() ~= name:lower() then
+            continue
+        end
+		RootPart.CFrame = CFrame.new(wp.pos[1], wp.pos[2], wp.pos[3])
+        unexpected:notify("teleportwaypoint", "Teleported to " .. name)
+        return
 	end
 	unexpected:notify("teleportwaypoint", "Waypoint not found: " .. name)
 end, {"twp"}, {"name"})
 
 unexpected:addcmd("tweenwaypoint", "Smoothly tween to a waypoint", function(name)
-	if not name or name == "" then return unexpected:notify("tweenwaypoint", "Usage: tweenwaypoint [name]") end
+	if not name or name == "" then
+        unexpected:notify("tweenwaypoint", "Usage: tweenwaypoint [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
-	for _, wp in ipairs(CONFIG.Waypoints) do
-		if wp.game == game.PlaceId and wp.name:lower() == name:lower() then
-			TweenService:Create(RootPart, TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(wp.pos[1], wp.pos[2], wp.pos[3])}):Play()
-			unexpected:notify("tweenwaypoint", "Tweening to " .. name)
-			return
-		end
+	for _, wp in next, CONFIG.Waypoints do
+        if wp.game ~= game.PlaceId or wp.name:lower() ~= name:lower() then
+            continue
+        end
+        TweenService:Create(RootPart, TweenInfo.new(tweenSpeed, Enum.EasingStyle.Linear), {CFrame = CFrame.new(wp.pos[1], wp.pos[2], wp.pos[3])}):Play()
+        unexpected:notify("tweenwaypoint", "Tweening to " .. name)
+        return
 	end
 	unexpected:notify("tweenwaypoint", "Waypoint not found: " .. name)
 end, {"twp"}, {"name"})
 
 unexpected:addcmd("walktowaypoint", "Walk to a waypoint", function(name)
-	if not name or name == "" then return unexpected:notify("walktowaypoint", "Usage: walktowaypoint [name]") end
+	if not name or name == "" then
+        unexpected:notify("walktowaypoint", "Usage: walktowaypoint [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
 	for _, wp in ipairs(CONFIG.Waypoints) do
 		if wp.game == game.PlaceId and wp.name:lower() == name:lower() then
-			if Humanoid and Humanoid.SeatPart then Humanoid.Sit = false task.wait(0.1) end
+			if Humanoid and Humanoid.SeatPart then
+                Humanoid.Sit = false
+                task.wait(0.1)
+            end
 			Humanoid.WalkToPoint = Vector3.new(wp.pos[1], wp.pos[2], wp.pos[3])
 			unexpected:notify("walktowaypoint", "Walking to " .. name)
 			return
@@ -2606,7 +2769,10 @@ unexpected:addcmd("walktowaypoint", "Walk to a waypoint", function(name)
 end, {"wtwp", "walktowp"}, {"name"})
 
 unexpected:addcmd("deletewaypoint", "Delete a saved waypoint", function(name)
-	if not name or name == "" then return unexpected:notify("deletewaypoint", "Usage: deletewaypoint [name]") end
+	if not name or name == "" then
+        unexpected:notify("deletewaypoint", "Usage: deletewaypoint [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
 	for i = #CONFIG.Waypoints, 1, -1 do
 		if CONFIG.Waypoints[i].game == game.PlaceId and CONFIG.Waypoints[i].name:lower() == name:lower() then
@@ -2622,7 +2788,10 @@ unexpected:addcmd("deletewaypoint", "Delete a saved waypoint", function(name)
 end, {"dwp", "delwp"}, {"name"})
 
 unexpected:addcmd("waypoints", "Show waypoints tab", function()
-	stACTIVETAB("waypoint", function() unexpected_UI.WPSEARCHBAR.Text="" renderList("waypoint") end)
+	stACTIVETAB("waypoint", function()
+        unexpected_UI.WPSEARCHBAR.Text = ""
+        renderList("waypoint")
+    end)
 end, {"listwp", "wps"})
 
 unexpected:addcmd("showwaypoints", "Show all waypoint visuals", function()
@@ -2657,7 +2826,10 @@ unexpected:addcmd("cleargamewaypoints", "Delete all waypoints for this game", fu
 end, {"cleargamewp", "cwp"})
 
 unexpected:addcmd("getwaypointpos", "Copy waypoint position", function(name)
-	if not name or name == "" then return unexpected:notify("getwaypointpos", "Usage: getwaypointpos [name]") end
+	if not name or name == "" then
+        unexpected:notify("getwaypointpos", "Usage: getwaypointpos [name]")
+        return
+    end
 	CONFIG.Waypoints = CONFIG.Waypoints or {}
 	for _, wp in ipairs(CONFIG.Waypoints) do
 		if wp.game == game.PlaceId and wp.name:lower() == name:lower() then
@@ -2680,7 +2852,10 @@ unexpected:addcmd("time", "Show game's clock time", function()
 end)
 
 unexpected:addcmd("getpos", "Get a player's position", function(name)
-	if not name then return unexpected:notify("getpos", "Usage: getpos [player]") end
+	if not name then
+		unexpected:notify("getpos", "Usage: getpos [player]")
+		return
+	end
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Name:lower() == name:lower() or p.DisplayName:lower() == name:lower() then
 			if RootPart then
@@ -2702,7 +2877,10 @@ unexpected:addcmd("version", "Show current script version", function()
 end)
 
 unexpected:addcmd("who", "Show info about a player", function(name)
-	if not name then return unexpected:notify("who", "Usage: who [player]") end
+	if not name then
+		unexpected:notify("who", "Usage: who [player]")
+		return
+	end
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Name:lower() == name:lower() or p.DisplayName:lower() == name:lower() then
 			local age = p.AccountAge
@@ -2739,7 +2917,10 @@ unexpected:addcmd("playercount", "Show player count", function()
 end)
 
 unexpected:addcmd("copyname", "Copy a player's username to clipboard", function(name)
-	if not name then return unexpected:notify("copyname", "Usage: copyname [player]") end
+	if not name then
+		unexpected:notify("copyname", "Usage: copyname [player]")
+		return
+	end
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Name:lower() == name:lower() or p.DisplayName:lower() == name:lower() then
 			setclipboard(p.Name)
@@ -2751,7 +2932,10 @@ unexpected:addcmd("copyname", "Copy a player's username to clipboard", function(
 end, nil, {"player"})
 
 unexpected:addcmd("copyid", "Copy a player's ID to clipboard", function(name)
-	if not name then return unexpected:notify("copyid", "Usage: copyid [player]") end
+	if not name then
+		unexpected:notify("copyid", "Usage: copyid [player]")
+		return
+	end
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Name:lower() == name:lower() or p.DisplayName:lower() == name:lower() then
 			setclipboard(tostring(p.UserId))
@@ -2765,10 +2949,16 @@ end, nil, {"player"})
 local spectating = false
 local spectateConn = nil
 unexpected:addcmd("spectate", "Spectate a player", function(name)
-	if not name then return unexpected:notify("spectate", "Usage: spectate [player]") end
+	if not name then
+		unexpected:notify("spectate", "Usage: spectate [player]")
+		return
+	end
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p.Name:lower() == name:lower() or p.DisplayName:lower() == name:lower() then
-			if not RootPart then return unexpected:notify("spectate", p.Name .. " has no character.") end
+			if not RootPart then
+		unexpected:notify("spectate", p.Name .. " has no character.")
+		return
+	end
 			spectating = true
 			if spectateConn then spectateConn:Disconnect() end
 			Camera.CameraType = Enum.CameraType.Scriptable
@@ -2785,7 +2975,10 @@ end, {"spec"}, {"player"})
 
 unexpected:addcmd("unspectate", "Stop spectating", function()
 	spectating = false
-	if spectateConn then spectateConn:Disconnect() spectateConn = nil end
+	if spectateConn then
+        spectateConn:Disconnect()
+        spectateConn = nil
+    end
 	Camera.CameraType = Enum.CameraType.Custom
 	Camera.CameraSubject = Humanoid
 	unexpected:notify("spectate", "Stopped.")
@@ -2865,7 +3058,10 @@ unexpected:addcmd("spin", "Spin your character", function(speed)
 end, nil, {"speed"})
 
 unexpected:addcmd("unspin", "Stop spinning your character", function()
-	if spinConnection then spinConnection:Disconnect() spinConnection = nil end
+	if spinConnection then
+        spinConnection:Disconnect()
+        spinConnection = nil
+    end
 	spinning = false
 end)
 
@@ -2886,7 +3082,10 @@ unexpected:addcmd("state", "Set HumanoidState", function(args)
 	if not input then return end
 	input = input:upper()
 	for _, state in ipairs(Enum.HumanoidStateType:GetEnumItems()) do
-		if state.Name:upper() == input then Humanoid:ChangeState(state) return end
+		if state.Name:upper() == input then
+            Humanoid:ChangeState(state)
+            return
+        end
 	end
 end)
 
@@ -2916,7 +3115,10 @@ unexpected:addcmd("keepUX", "Keep 'unexpected' running even on rejoin", function
 	state = typeof(state) == "string" and state:lower() or ""
 	if state == "true" then getgenv().keepUX = true
 	elseif state == "false" then getgenv().keepUX = false
-	else unexpected:notify("keepUX", "Usage: keepUX true/false") return end
+	else
+        unexpected:notify("keepUX", "Usage: keepUX true/false")
+        return
+    end
 	CONFIG.keepUX = getgenv().keepUX
 	UX_config()
 	unexpected:notify("keepUX", "Now set to:", tostring(getgenv().keepUX))
@@ -2924,7 +3126,10 @@ end, nil, {"true/false"})
 
 local flying, flyConnA, flyConnB = false, nil, nil
 unexpected:addcmd("fly", "Enable flying", function(spd)
-	if flying then return unexpected:notify("flying", "Unfly first before changing speed") end
+	if flying then
+		unexpected:notify("flying", "Unfly first before changing speed")
+		return
+	end
 	spd, flying = tonumber(spd) or 3, true
 	Humanoid.PlatformStand = true
 	bv, bg = Instance.new("BodyVelocity", RootPart), Instance.new("BodyGyro", RootPart)
@@ -2969,8 +3174,14 @@ end, nil, {"speed"})
 unexpected:addcmd("unfly", "Disable flying", function()
 	flying = false
 	Humanoid.PlatformStand = false
-	if flyConnA then flyConnA:Disconnect() flyConnA = nil end
-	if flyConnB then flyConnB:Disconnect() flyConnB = nil end
+	if flyConnA then
+        flyConnA:Disconnect()
+        flyConnA = nil
+    end
+	if flyConnB then
+        flyConnB:Disconnect()
+        flyConnB = nil
+    end
 	for _, inst in ipairs({bv, bg}) do if inst and inst.Destroy then inst:Destroy() end end
 	task.wait()
 	Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -2997,7 +3208,10 @@ unexpected:addcmd("antifling", "Stops flings via velocity detection", function()
 end)
 
 unexpected:addcmd("unantifling", "Disables fling protection", function()
-	if afConn then afConn:Disconnect() afConn = nil end
+	if afConn then
+        afConn:Disconnect()
+        afConn = nil
+    end
 end)
 
 do
@@ -3020,22 +3234,33 @@ unexpected:addcmd("execute", "Execute code", function(...) loadstring(...)() end
 unexpected:addcmd("execmd", "Execute command", function(cmdName, ...) execmd(cmdName, ...) end, nil, {"command", "..."})
 
 unexpected:addcmd("enable", "Enable Visibility of a CoreGui", function(what)
-	local input = what and what:lower() if not input then return end
-	if input == "reset" then StarterGui:SetCore("ResetButtonCallback", true) return end
+	local input = what and what:lower()
+    if not input then return end
+	if input == "reset" then
+        StarterGui:SetCore("ResetButtonCallback", true)
+        return
+    end
 	local t = coreGuiTypeNames[input]
 	if t then StarterGui:SetCoreGuiEnabled(t, true) end
 end, nil, {"inventory/playerlist/chat/reset/emote/all"})
 
 unexpected:addcmd("disable", "Disable Visibility of a CoreGui", function(what)
-	local input = what and what:lower() if not input then return end
-	if input == "reset" then StarterGui:SetCore("ResetButtonCallback", false) return end
+	local input = what and what:lower()
+    if not input then return end
+	if input == "reset" then
+        StarterGui:SetCore("ResetButtonCallback", false)
+        return
+    end
 	local t = coreGuiTypeNames[input]
 	if t then StarterGui:SetCoreGuiEnabled(t, false) end
 end, nil, {"inventory/playerlist/chat/reset/emote/all"})
 
 unexpected:addcmd("creatorid", "Copy the creator's ID", function()
 	local id = game.CreatorType == Enum.CreatorType.User and game.CreatorId or game.CreatorType == Enum.CreatorType.Group and GroupService:GetGroupInfoAsync(game.CreatorId).Owner.Id
-	if id then setclipboard(id) unexpected:notify("Creator ID", id) end
+	if id then
+        setclipboard(id)
+        unexpected:notify("Creator ID", id)
+    end
 end)
 
 unexpected:addcmd("render", "Enable or disable 3D rendering", function(state)
@@ -3057,7 +3282,10 @@ unexpected:addcmd("dance", "Start dancing", function()
 end)
 
 unexpected:addcmd("undance", "Stop dancing", function()
-	if danceTrack then danceTrack:Stop() danceTrack:Destroy() end
+	if danceTrack then
+        danceTrack:Stop()
+        danceTrack:Destroy()
+    end
 end)
 
 unexpected:addcmd("sitwalk", "Set animations to sit", function()
@@ -3076,12 +3304,31 @@ end, nil, {"true/false"})
 
 unexpected:addcmd("exit", "Exit unexpected script", function()
 	tpCHECK = true
-	if spectateConn then spectateConn:Disconnect() spectateConn = nil end
-	if flyConnA then flyConnA:Disconnect() flyConnA = nil end
-	if flyConnB then flyConnB:Disconnect() flyConnB = nil end
-	if afConn then afConn:Disconnect() afConn = nil end
-	if danceTrack then danceTrack:Stop() danceTrack:Destroy() danceTrack = nil end
-	if spinConnection then spinConnection:Disconnect() spinConnection = nil end
+	if spectateConn then
+        spectateConn:Disconnect()
+        spectateConn = nil
+    end
+	if flyConnA then
+        flyConnA:Disconnect()
+        flyConnA = nil
+    end
+	if flyConnB then
+        flyConnB:Disconnect()
+        flyConnB = nil
+    end
+	if afConn then
+        afConn:Disconnect()
+        afConn = nil
+    end
+	if danceTrack then
+        danceTrack:Stop()
+        danceTrack:Destroy()
+        danceTrack = nil
+    end
+	if spinConnection then
+        spinConnection:Disconnect()
+        spinConnection = nil
+    end
 	disconnectEvents()
 	for key, conns in pairs(bindConnections) do if conns then conns:Disconnect() end end
 	unexpected_UI.UI:Destroy()
@@ -3111,9 +3358,15 @@ unexpected:addcmd("team", "Switch team", function(teamN)
 	local teamName = teamN and teamN:lower()
 	local team
 	for _, v in ipairs(Teams:GetChildren()) do
-		if v.Name:lower():find(teamName) then team = v break end
+		if v.Name:lower():find(teamName) then
+            team = v
+            break
+        end
 	end
-	if not team then return unexpected:notify("team", "Invalid team: " .. tostring(teamName)) end
+	if not team then
+        unexpected:notify("team", `Invalid team: {teamName}`)
+        return
+    end
 	if RootPart and firetouchinterest then
 		for _, v in ipairs(Workspace:GetDescendants()) do
 			if v:IsA("SpawnLocation") and v.TeamColor == team.TeamColor and v.AllowTeamChangeOnTouch then
@@ -3210,6 +3463,7 @@ unexpected:addcmd("trip", "Slip", function()
 	end
 end)
 
+local flinging, flingDied
 unexpected:addcmd("fling", "Enable/disable flinging", function(state)
 	local enable = ParseBool(state, true)
 	if enable then
@@ -3257,9 +3511,15 @@ unexpected:addcmd("simplespy", "Spies on remotes", function()
 end, {"remotespy"})
 
 unexpected:addcmd("importiy", "Import plugins, binds, and events from Infinite Yield", function()
-    if not isfile("IY_FE.iy") then return unexpected:notify("importiy", "IY_FE.iy not found.") end
+    if not isfile("IY_FE.iy") then
+		unexpected:notify("importiy", "IY_FE.iy not found.")
+		return
+	end
     local ok, parsed = pcall(function() return HttpService:JSONDecode(readfile("IY_FE.iy")) end)
-    if not ok or type(parsed) ~= "table" then return unexpected:notify("importiy", "Failed to parse IY_FE.iy") end
+    if not ok or type(parsed) ~= "table" then
+		unexpected:notify("importiy", "Failed to parse IY_FE.iy")
+		return
+	end
     local imported = { plugins = 0, binds = 0, events = 0 }
     CONFIG.Plugins, CONFIG.Binds, CONFIG.Events, CONFIG.Autoruns =
         CONFIG.Plugins or {}, CONFIG.Binds or {}, CONFIG.Events or {}, CONFIG.Autoruns or {}
@@ -3557,7 +3817,10 @@ local function storeItems_init()
 	for _, p in ipairs(_storeCache) do
 		local name = p.name or "unknown"
 		for _, f in ipairs(p.files or {}) do local n = f.filename:match("(.+)%.iy$")
-			if n then name = n break end
+			if n then
+                name = n
+                break
+            end
 		end
 
 		_storeProcessed[#_storeProcessed+1] = {
@@ -3572,7 +3835,6 @@ local function storeItems_init()
 end
 
 mkListSystem("store", unexpected_UI.STRBTNLIST, mkBTNEXAMPLE("storeEntry"), storeItems_init)
-local currentStoreItem
 local info = unexpected_UI.INFOFRAME
 local mf = unexpected_UI.MENUFRAME
 local actionBtn = unexpected_UI.INFOACTION
@@ -3694,7 +3956,7 @@ if IsMobile then
 	applyScale()
 end
 
-local tpCHECK = false
+tpCHECK = false
 LocalPlayer.OnTeleport:Connect(function()
 	if getgenv().keepUX and not tpCHECK and queueteleport then
 		tpCHECK = true
